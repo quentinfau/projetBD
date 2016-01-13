@@ -9,7 +9,7 @@ public class Application {
 
 	static final String CONN_URL = "jdbc:oracle:thin:@im2ag-oracle.e.ujf-grenoble.fr:1521:ufrima";
 
-	static final String USER = "fauq";
+	static final String USER = "salema";
 	static final String PASSWD = "bd2015";
 	static final Requete req = new Requete();
 

@@ -13,8 +13,3 @@ drop table Supply ;
 drop table Prestataire ;
 drop table Formats ;
 
-
-
-
-
-

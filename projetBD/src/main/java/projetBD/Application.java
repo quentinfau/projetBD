@@ -44,9 +44,9 @@ public class Application {
 
 		System.out.println("*** Choisir une action a effectuer : ***");
 		System.out.println("0 : Quitter");
-		System.out.println("1 : create table");
-		System.out.println("2 : select *");
-		System.out.println("3 : Affecter un gardien à une cage");
+		System.out.println("1 : Creer table");
+		System.out.println("2 : Remplir table");
+		System.out.println("3 : Afficher table");
 		System.out.println("4 : Modifier l’affectation d’un gardien");
 		System.out
 				.println("5 : Déclarer une nouvelle maladie pour un animal (et mettre à jour son nombre de maladie)");
@@ -54,36 +54,36 @@ public class Application {
 		System.out.println("7 : Test DeadLock");
 		System.out.println("8 : setIsolation");
 		System.out.println("9 : Rollback");
-		System.out.println("10 : delete table");
-		System.out.println("11 : Rollback");
+		System.out.println("10 : Drop table");
+		System.out.println("11 : Test");
 		System.out.println("12 : Rollback");
 	}
 
-	private static void Q1() throws SQLException {
+	private static void creerTable() throws SQLException {
 		req.createTable(stmt);
 
+	}
+
+	private static void remplirTable() throws SQLException {
+		req.insertIntoTable(stmt);
+
+	}
+
+	private static void afficherTable() throws SQLException {
+		req.getContenuTable(stmt);
 	}
 
 	private static void dropTable() throws SQLException {
 		req.dropTable(stmt);
 
 	}
-
-	private static void insertIntoTable() throws SQLException {
-		req.insertIntoTable(stmt);
-
-	}
-
-	private static void Q2() throws SQLException {
-		req.getContenuTable(stmt);
-	}
-
-	private static void Q3() throws SQLException {
+	
+	private static void test() throws SQLException {
 		stmt.executeQuery("drop table test");
-		req.executeFile(stmt, "src/main/resources/test.sql");
+		//req.executeFile(stmt, "src/main/resources/test.sql");
 
-		stmt.executeQuery("insert into test values (12, 'Spinnard')");
-		stmt.executeQuery("insert into test values (13, 'Spinnardo')");
+		//stmt.executeQuery("insert into test values (12, 'Spinnard')");
+		//stmt.executeQuery("insert into test values (13, 'Spinnardo')");
 	}
 
 	private static void Q4() throws SQLException {
@@ -133,13 +133,13 @@ public class Application {
 					exit = true;
 					break;
 				case 1:
-					Q1();
+					creerTable();
 					break;
 				case 2:
-					Q2();
+					remplirTable();
 					break;
 				case 3:
-					Q3();
+					afficherTable();
 					break;
 				case 4:
 					Q4();
@@ -163,7 +163,7 @@ public class Application {
 					dropTable();
 					break;
 				case 11:
-					insertIntoTable();
+					test();
 					break;
 				default:
 					System.out.println("=> choix incorrect");

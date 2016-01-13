@@ -29,13 +29,11 @@ create table Formats  (
 
 create table Prestataire (
 	IdPrestataire int, 
-	nomPresta varchar(50), 
-	PrenomPresta varchar(50), 
-	adresse varchar(50), 
+	NamePresta varchar(50), 
+	Adresse varchar(50), 
 	Preference varchar(50),
 	primary key(IdPrestataire)
 );
-
 
 create table CodePromo(
 	IdPromo int NOT NULL, 
@@ -102,12 +100,12 @@ create table Contact (
 );
 
 create table Photo (
+	NumPage varchar(50),
 	IdAlbum int,
 	IdImage int, 
 	Title varchar(50),
 	Comments varchar(50),
-	NumPage varchar(50),
-	primary key(IdAlbum,IdImage),
+	primary key(NumPage),
 	constraint PhotoAlbum_C1 foreign key (IdAlbum) references Album(IdAlbum),
 	constraint PhotoImage_C2 foreign key (IdImage) references Image(IdImage)
 );

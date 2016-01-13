@@ -1,11 +1,7 @@
 package projetBD;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -58,22 +54,34 @@ public class Application {
 		System.out.println("7 : Test DeadLock");
 		System.out.println("8 : setIsolation");
 		System.out.println("9 : Rollback");
+		System.out.println("10 : delete table");
+		System.out.println("11 : Rollback");
+		System.out.println("12 : Rollback");
 	}
 
 	private static void Q1() throws SQLException {
-		req.creerTable(stmt);
+		req.createTable(stmt);
+
+	}
+
+	private static void dropTable() throws SQLException {
+		req.dropTable(stmt);
+
+	}
+
+	private static void insertIntoTable() throws SQLException {
+		req.insertIntoTable(stmt);
 
 	}
 
 	private static void Q2() throws SQLException {
-
-		ResultSet res = stmt.executeQuery("select * from Client");
-		while (res.next()) {
-			System.out.println(res.getInt("test") + "    " + res.getString("test2"));
-		}
+		req.getContenuTable(stmt);
 	}
 
 	private static void Q3() throws SQLException {
+		stmt.executeQuery("drop table test");
+		req.executeFile(stmt, "src/main/resources/test.sql");
+
 		stmt.executeQuery("insert into test values (12, 'Spinnard')");
 		stmt.executeQuery("insert into test values (13, 'Spinnardo')");
 	}
@@ -150,6 +158,12 @@ public class Application {
 					break;
 				case 9:
 					rollback();
+					break;
+				case 10:
+					dropTable();
+					break;
+				case 11:
+					insertIntoTable();
 					break;
 				default:
 					System.out.println("=> choix incorrect");

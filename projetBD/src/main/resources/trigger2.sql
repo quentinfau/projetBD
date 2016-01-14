@@ -5,7 +5,7 @@ v1 integer;
 v2 integer; 
 Begin 
 
-Select Image.ResolutionImage into v1, Formats.ResolutionMin into v2 From Image, Formats 
+Select Image.ResolutionImage, Formats.ResolutionMin into v1, v2 From Image, Formats, Article, Client, Album 
                                                          Where (Formats.IdFormat = Article.IdFormat
 														    and Article.IdAlbum=Album.IdAlbum
 														    and Album.IdClient= Client.IdClient 

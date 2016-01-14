@@ -56,6 +56,12 @@ public class Requete {
 	public void insertIntoTable(Statement stmt) {
 		executeFile(stmt, RESOURCES + "insert.sql");
 	}
+	
+	public void testTrigger(Statement stmt) {
+		System.out.println("nom du fichier trigger.sql ?");
+		String name = LectureClavier.lireChaine();
+		executeFile(stmt, RESOURCES + name);
+	}
 
 	public void listerTables(Statement stmt) {
 

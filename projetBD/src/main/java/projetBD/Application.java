@@ -47,7 +47,7 @@ public class Application {
 		System.out.println("1 : Creer table");
 		System.out.println("2 : Remplir table");
 		System.out.println("3 : Afficher table");
-		System.out.println("4 : Modifier l’affectation d’un gardien");
+		System.out.println("4 : Test Trigger");
 		System.out
 				.println("5 : Déclarer une nouvelle maladie pour un animal (et mettre à jour son nombre de maladie)");
 		System.out.println("6 : Commit");
@@ -75,6 +75,11 @@ public class Application {
 
 	private static void dropTable() throws SQLException {
 		req.dropTable(stmt);
+
+	}
+	
+	private static void testTrigger() throws SQLException {
+		req.testTrigger(stmt);
 
 	}
 	
@@ -142,7 +147,7 @@ public class Application {
 					afficherTable();
 					break;
 				case 4:
-					Q4();
+					testTrigger();
 					break;
 				case 5:
 					Q5();

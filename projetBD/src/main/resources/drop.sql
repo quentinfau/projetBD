@@ -13,3 +13,12 @@ drop table Supply ;
 drop table Prestataire ;
 drop table Formats ;
 
+drop sequence IdIdSupply;
+drop sequence IdArticle;
+drop sequence IdOrders;
+drop sequence IdCodePromo;
+drop sequence IdImage;
+drop sequence IdAlbum;
+drop sequence IdClient;
+drop sequence IdPrestataire;
+drop sequence IdFormats;

@@ -1,5 +1,3 @@
-
-
 create table Client (
 	IdClient int, 
 	FirstName varchar(50), 
@@ -9,6 +7,10 @@ create table Client (
 	Address varchar(50),
 	primary key (IdClient)
 );
+CREATE SEQUENCE IdClient
+ START WITH     1
+ INCREMENT BY   1
+ Cache 50;
 
 create table Supply  (
 	IdSupply int, 
@@ -16,6 +18,10 @@ create table Supply  (
 	StatusSup varchar(50) CHECK( StatusSup IN ('en cours','envoye','annule') ),
 	primary key(IdSupply)
 );
+CREATE SEQUENCE IdSupply
+ START WITH     1
+ INCREMENT BY   1
+ Cache 50;
 
 create table Formats  (
 	IdFormat int, 
@@ -26,6 +32,10 @@ create table Formats  (
 	Stock int,
 	primary key (IdFormat)
 );
+CREATE SEQUENCE IdFormat
+ START WITH     1
+ INCREMENT BY   1
+ Cache 50;
 
 create table Prestataire (
 	IdPrestataire int, 
@@ -34,6 +44,10 @@ create table Prestataire (
 	Preference int,
 	primary key(IdPrestataire)
 );
+CREATE SEQUENCE IdPrestataire
+ START WITH     1
+ INCREMENT BY   1
+ Cache 50;
 
 create table CodePromo(
 	IdPromo int NOT NULL, 
@@ -42,6 +56,10 @@ create table CodePromo(
 	primary key (IdPromo),
 	constraint CodePromo_C1 foreign key (IdClient) references Client(IdClient) 
 );
+CREATE SEQUENCE IdPromo
+ START WITH     1
+ INCREMENT BY   1
+ Cache 50;
 
 create table Orders  (
 	IdOrder int NOT NULL, 
@@ -52,21 +70,31 @@ create table Orders  (
 	primary key (IdOrder),
 	constraint Orders_C1 foreign key (IdClient) references Client(IdClient) 
 );
+CREATE SEQUENCE IdOrder
+ START WITH     1
+ INCREMENT BY   1
+ Cache 50;
+
 
 create table Album  (
 	IdAlbum int NOT NULL, 
-	IdClient int, 
+	IdClient int NOT NULL, 
 	NbPages int,
+	NameAlbum varchar(); 
 	primary key (IdAlbum),
 	constraint Album_C1 foreign key (IdClient) references Client(IdClient) 
 );
+CREATE SEQUENCE IdAlbum
+ START WITH     1
+ INCREMENT BY   1
+ Cache 50;
 
 create table Article (
 	IdArticle int NOT NULL, 
 	IdOrder int NOT NULL,
 	IdAlbum int NOT NULL, 
 	IdSupply int NOT NULL, 
-	IdFormat int NOT NULL, 
+	IdFormat int NOT NULL,
 	Quantity int,
 	primary key(IdArticle),
 	constraint ArticleFormat_C1 foreign key (IdFormat) references Formats(IdFormat),
@@ -74,6 +102,10 @@ create table Article (
 	constraint ArticleAlbum_C3 foreign key (IdAlbum) references Album(IdAlbum),
 	constraint ArticleSupply_C4 foreign key (IdSupply) references Supply(IdSupply)
 );
+CREATE SEQUENCE IdArticle
+ START WITH     1
+ INCREMENT BY   1
+ Cache 50;
 
 create table Image (
 	IdImage int NOT NULL,
@@ -85,6 +117,10 @@ create table Image (
 	primary key(IdImage),
 	constraint Image_C1 foreign key (IdClient) references Client(IdClient)
 );
+CREATE SEQUENCE IdImage
+ START WITH     1
+ INCREMENT BY   1
+ Cache 50;
 
 
 create table Contact (

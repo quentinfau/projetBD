@@ -190,4 +190,20 @@ public class Requete {
 
 		}
 	}
+	public void cleanImageAfterLogoff(Statement stmt) {
+
+		ResultSet res;
+		try {
+			res = stmt.executeQuery(
+					"select distinct(idImage) from image where idImage not in (select distinct(idImage) from Photo natural join image ) ");
+			while (res.next()) {
+				String idImage = res.getString("idImage");
+				stmt.executeUpdate("delete from image where idImage=" + idImage);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
 }

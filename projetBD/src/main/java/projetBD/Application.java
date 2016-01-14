@@ -77,18 +77,18 @@ public class Application {
 		req.dropTable(stmt);
 
 	}
-	
+
 	private static void testTrigger() throws SQLException {
 		req.testTrigger(stmt);
 
 	}
-	
+
 	private static void test() throws SQLException {
 		stmt.executeQuery("drop table test");
-		//req.executeFile(stmt, "src/main/resources/test.sql");
+		// req.executeFile(stmt, "src/main/resources/test.sql");
 
-		//stmt.executeQuery("insert into test values (12, 'Spinnard')");
-		//stmt.executeQuery("insert into test values (13, 'Spinnardo')");
+		// stmt.executeQuery("insert into test values (12, 'Spinnard')");
+		// stmt.executeQuery("insert into test values (13, 'Spinnardo')");
 	}
 
 	private static void Q4() throws SQLException {
@@ -119,6 +119,19 @@ public class Application {
 
 	private static void setIsolation() throws SQLException {
 		conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+	}
+
+	private static void closeConnection(Statement stmt) {
+
+		try {
+			req.cleanImageAfterLogoff(stmt);
+			stmt.close();
+
+			conn.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public static void main(String args[]) {
@@ -176,9 +189,7 @@ public class Application {
 				}
 			}
 
-			// Liberation des ressources et fermeture de la connexion...
-			stmt.close();
-			conn.close();
+			closeConnection(stmt);
 
 			System.out.println("au revoir");
 

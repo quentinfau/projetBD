@@ -80,6 +80,7 @@ create table Album  (
 	IdAlbum int NOT NULL, 
 	IdClient int NOT NULL, 
 	NbPages int,
+	NameAlbum varchar(50), 
 	primary key (IdAlbum),
 	constraint Album_C1 foreign key (IdClient) references Client(IdClient) 
 );
@@ -94,7 +95,6 @@ create table Article (
 	IdAlbum int NOT NULL, 
 	IdSupply int NOT NULL, 
 	IdFormat int NOT NULL,
-	NameAlbum varchar(50), 
 	Quantity int,
 	primary key(IdArticle),
 	constraint ArticleFormat_C1 foreign key (IdFormat) references Formats(IdFormat),

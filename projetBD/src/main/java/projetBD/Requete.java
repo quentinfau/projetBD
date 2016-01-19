@@ -124,7 +124,7 @@ public class Requete {
 		}
 		return retour;
 	}
-
+	
 	public void createAlbum(Statement stmt, String IdClient) {
 		System.out.println("Quel type voulez-vous ? ");
 		System.out.println("1 : Album ");

@@ -12,6 +12,8 @@ public class Application {
 	static final String USER = "salema";
 	static final String PASSWD = "bd2015";
 	static final Requete req = new Requete();
+	static Connection conn;
+	static Statement stmt;
 
 	private static void connexion() {
 
@@ -37,9 +39,6 @@ public class Application {
 
 	}
 
-	static Connection conn;
-	static Statement stmt;
-
 	private static void menu() {
 
 		System.out.println("*** Choisir une action a effectuer : ***");
@@ -59,41 +58,12 @@ public class Application {
 		System.out.println("12 : Rollback");
 	}
 
-	private static void creerTable() throws SQLException {
-		req.createTable(stmt);
-
-	}
-
-	private static void remplirTable() throws SQLException {
-		req.insertIntoTable(stmt);
-
-	}
-
-	private static void afficherTable() throws SQLException {
-		req.getContenuTable(stmt);
-	}
-
-	private static void dropTable() throws SQLException {
-		req.dropTable(stmt);
-
-	}
-
-	private static void testTrigger() throws SQLException {
-		req.testTrigger(stmt);
-
-	}
-
 	private static void test() throws SQLException {
 		stmt.executeQuery("drop table test");
 		// req.executeFile(stmt, "src/main/resources/test.sql");
 
 		// stmt.executeQuery("insert into test values (12, 'Spinnard')");
 		// stmt.executeQuery("insert into test values (13, 'Spinnardo')");
-	}
-
-	private static void Q4() throws SQLException {
-		int var = LectureClavier.lireEntier("nouvelle valeur");
-		stmt.executeUpdate("update LesGardiens set noCage=" + var + " where nomE='Labbe' and noCage=12");
 	}
 
 	private static void Q5() throws SQLException {
@@ -151,16 +121,16 @@ public class Application {
 					exit = true;
 					break;
 				case 1:
-					creerTable();
+					req.createTable(stmt);
 					break;
 				case 2:
-					remplirTable();
+					req.insertIntoTable(stmt);
 					break;
 				case 3:
-					afficherTable();
+					req.getContenuTable(stmt);
 					break;
 				case 4:
-					testTrigger();
+					req.createTrigger(stmt);
 					break;
 				case 5:
 					Q5();
@@ -178,7 +148,7 @@ public class Application {
 					rollback();
 					break;
 				case 10:
-					dropTable();
+					req.dropTable(stmt);
 					break;
 				case 11:
 					test();

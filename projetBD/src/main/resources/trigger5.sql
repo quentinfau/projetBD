@@ -1,6 +1,3 @@
---Lorsqu’une commande est effectué, et que le format sélectionné ne contient plus de stock (stock = 0 plus de papier) ,
---la livraison passe au statut en cours, sinon elle sera au statut envoyé. (SGBD trigger sur commande insert)
-
 Create or Replace TRIGGER G5
 After insert or Update on Orders
 For each row

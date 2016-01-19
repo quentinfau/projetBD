@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.chrono.IsoChronology;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -81,7 +82,7 @@ public class Requete {
 		dropTable(stmt);
 		executeFile(stmt, RESOURCES + "table.sql");
 	}
-	
+
 	public void createClient(Statement stmt) {
 		System.out.println("Entrer le prénom du client");
 		String prenom = LectureClavier.lireChaine();
@@ -93,11 +94,11 @@ public class Requete {
 		String pw = LectureClavier.lireChaine();
 		System.out.println("Entrer le adresse du client");
 		String adresse = LectureClavier.lireChaine();
-		String sql = "insert into Client values(IdClient.NEXTVAL,'" + prenom
-				+ "','" + nom + "','" + mail + "','" + pw + "','" + adresse
-				+ "');";
+		String sql = "insert into Client values(IdClient.NEXTVAL,'" + prenom + "','" + nom + "','" + mail + "','" + pw
+				+ "','" + adresse + "')";
 		try {
 			stmt.executeUpdate(sql);
+			System.out.println("Client créée");
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -110,21 +111,24 @@ public class Requete {
 		System.out.println("Entrer votre mot de passe :");
 		String pw = LectureClavier.lireChaine();
 
-		String sql = "Select IdClient FROM Client Where FirstName='" + prenom
-				+ "' AND password='" + pw + "';";
+		String sql = "Select IdClient FROM Client Where FirstName='" + prenom + "' AND password='" + pw + "'";
 		ResultSet res;
 		String retour = null;
 		try {
 			res = stmt.executeQuery(sql);
-			res.next();
+			if (!res.next()) {
+				System.err.println("client inconnu");
+				return null;
+			}
 			retour = res.getString(1);
+			System.out.println("votre id client est " + retour);
+			System.out.println("Bonjour " + prenom);
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return retour;
 	}
-	
+
 	public void createAlbum(Statement stmt, String IdClient) {
 		System.out.println("Quel type voulez-vous ? ");
 		System.out.println("1 : Album ");
@@ -132,32 +136,65 @@ public class Requete {
 		System.out.println("3 : Calendrier ");
 		System.out.println("4 : Livre ");
 		String choice = LectureClavier.lireChaine();
-		String sql= null;
-		
-		sql = "insert into Album values(IdAlbum.NEXTVAL,'" + IdClient+ "');";
-		switch (choice) {
-		case "1":
-			
-			break;
-		case "2":
-			sql = "insert into Album values(IdAlbum.NEXTVAL,'" + IdClient+ "');";
-
-			break;
-		case "3":
-			sql = "insert into Album values(IdAlbum.NEXTVAL,'" + IdClient+ "');";
-			break;
-		case "4":
-			sql = "insert into Album values(IdAlbum.NEXTVAL,'" + IdClient+ "');";
-			break;
-		}
-		
-		String trig ="IdAlbum";
+		String nbPage = null, nameAlbum;
+		String sql = null;
+		ResultSet res;
 		try {
-			stmt.executeUpdate(sql);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			sql = "insert into Album values(IdAlbum.NEXTVAL,'" + IdClient + "')";
+			switch (choice) {
+			case "1":
+				System.out.println("Combien de pages ?");
+				nbPage = LectureClavier.lireChaine();
+				System.out.println("Nom de l'album ?");
+				nameAlbum = LectureClavier.lireChaine();
+				sql = "insert into Album values(IdAlbum.NEXTVAL," + IdClient + "," + nbPage + ",'" + nameAlbum + "')";
+				break;
+			case "2":
+				System.out.println("Quel type d'agenda (52s ou 365j) ?");
+				String typeAgenda = LectureClavier.lireChaine();
+				System.out.println("Nom de l'agenda ?");
+				nameAlbum = LectureClavier.lireChaine();
+				if (typeAgenda.equals("52s")) {
+					nbPage = "52";
+				} else if (typeAgenda.equals("365j")) {
+					nbPage = "365";
+				} else {
+					System.err.println("Type agenda invalide");
+					break;
+				}
+				sql = "insert into Album values(IdAlbum.NEXTVAL," + IdClient + "," + nbPage + ",'" + nameAlbum + "')";
+
+				stmt.executeQuery(sql);
+				sql = "select IdAlbum.currval from dual";
+				res = stmt.executeQuery(sql);
+				res.next();
+				sql = "insert into Agenda values(" + res.getString(1) + ",'" + typeAgenda + "')";
+				stmt.executeQuery(sql);
+
+				break;
+			case "3":
+				System.out.println("Quel type de calendrier (bureau ou mural) ?");
+				String typeCalendar = LectureClavier.lireChaine();
+				System.out.println("Nom du calendrier ?");
+				nameAlbum = LectureClavier.lireChaine();
+				nbPage = "12";
+				sql = "insert into Album values(IdAlbum.NEXTVAL," + IdClient + "," + nbPage + ",'" + nameAlbum + "')";
+
+				stmt.executeQuery(sql);
+				sql = "select IdAlbum.currval from dual";
+				res = stmt.executeQuery(sql);
+				res.next();
+				sql = "insert into Agenda values(" + res.getString(1) + ",'" + typeCalendar + "')";
+				stmt.executeQuery(sql);
+				break;
+			case "4":
+				break;
+			}
+		} catch (SQLException e1) {
+
+			e1.printStackTrace();
 		}
+
 	}
 
 	public void AddImage(Statement stmt, String IdClient) {
@@ -165,18 +202,42 @@ public class Requete {
 		String path = LectureClavier.lireChaine();
 		System.out.println("Ajoutez des informations à votre image : ");
 		String info = LectureClavier.lireChaine();
-		System.out
-				.println("Voulez-vous partager l'image ? oui --> 1   /  non --> 0 ");
+		System.out.println("Voulez-vous partager l'image ? oui --> 1   /  non --> 0 ");
 		String share = LectureClavier.lireChaine();
 		String sql = "insert into Image(IdImage, IdClient, PathImage, Shared, ResolutionImage, Info) "
-				+ "values(IdImage.NEXTVAL,'"
-				+ IdClient
-				+ "','"
-				+ path
-				+ "','"
-				+ share + "',16,'" + info + "');";
+				+ "values(IdImage.NEXTVAL,'" + IdClient + "','" + path + "'," + share + ",16,'" + info + "')";
 		try {
 			stmt.executeUpdate(sql);
+			System.out.println("image ajouté");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void ajouterImageDansAlbum(Statement stmt, String idClient) {
+		System.out.println("Voici vos albums : ");
+		getContenuTable(stmt, "Album", idClient);
+		System.out.println("Entrez l'id de l'album concerné : ");
+		String idAlbum = LectureClavier.lireChaine();
+		System.out.println("Contenu de l'album");
+		getContenuTableWithCondition(stmt, "Photo", "idAlbum=" + idAlbum);
+
+		System.out.println("Voici les images disponibles pour vous : ");
+		getContenuTable(stmt, "Image", idClient);
+		getContenuTableWithCondition(stmt, "Image", "shared=1");
+		System.out.println("Entrez l'id de l'image a ajouté");
+		String idImage = LectureClavier.lireChaine();
+		System.out.println("Entrez le numéro de page");
+		String numPage = LectureClavier.lireChaine();
+		System.out.println("Entrez un titre");
+		String titre = LectureClavier.lireChaine();
+		System.out.println("Entrez un commentaire");
+		String com = LectureClavier.lireChaine();
+		String sql = "insert into Photo values(" + numPage + "," + idAlbum + "," + idImage + ",'" + titre + "','" + com
+				+ "')";
+
+		try {
+			stmt.executeQuery(sql);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -217,12 +278,75 @@ public class Requete {
 		return nbColumn;
 	}
 
-	public void getContenuTable(Statement stmt) {
+	public void getContenuTable(Statement stmt, String nomTable, String idClient) {
 		try {
-			System.out.println("Quel table voulez vous afficher ?");
-			listerTables(stmt);
-			String nomTable = LectureClavier.lireChaine();
+			Integer nbColumn = getNbColumn(stmt, nomTable);
 
+			ResultSet res = stmt.executeQuery("select * from " + nomTable + " where IdClient=" + idClient);
+
+			ArrayList<List<String>> listeTuples = new ArrayList<>();
+
+			while (res.next()) {
+				ArrayList<String> tuple = new ArrayList<>();
+				for (int i = 1; i <= nbColumn; i++) {
+					tuple.add(res.getString(i));
+				}
+				listeTuples.add(tuple);
+			}
+			afficherTuples(listeTuples);
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void getContenuTableWithCondition(Statement stmt, String nomTable, String condition) {
+		try {
+			Integer nbColumn = getNbColumn(stmt, nomTable);
+
+			ResultSet res = stmt.executeQuery("select * from " + nomTable + " where " + condition);
+
+			ArrayList<List<String>> listeTuples = new ArrayList<>();
+
+			while (res.next()) {
+				ArrayList<String> tuple = new ArrayList<>();
+				for (int i = 1; i <= nbColumn; i++) {
+					tuple.add(res.getString(i));
+				}
+				listeTuples.add(tuple);
+			}
+			afficherTuples(listeTuples);
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void getContenuTableWithCondition(Statement stmt, String nomTable, String idClient, String condition) {
+		try {
+			Integer nbColumn = getNbColumn(stmt, nomTable);
+
+			ResultSet res = stmt
+					.executeQuery("select * from " + nomTable + " where IdClient=" + idClient + " AND " + condition);
+
+			ArrayList<List<String>> listeTuples = new ArrayList<>();
+
+			while (res.next()) {
+				ArrayList<String> tuple = new ArrayList<>();
+				for (int i = 1; i <= nbColumn; i++) {
+					tuple.add(res.getString(i));
+				}
+				listeTuples.add(tuple);
+			}
+			afficherTuples(listeTuples);
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void getContenuTable(Statement stmt, String nomTable) {
+		try {
 			Integer nbColumn = getNbColumn(stmt, nomTable);
 
 			ResultSet res = stmt.executeQuery("select * from " + nomTable);

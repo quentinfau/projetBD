@@ -8,11 +8,11 @@ import java.sql.Statement;
 public class Client {
 	static final String CONN_URL = "jdbc:oracle:thin:@im2ag-oracle.e.ujf-grenoble.fr:1521:ufrima";
 
-	static final String USER = "salema";
+	static final String USER = "fauq";
 	static final String PASSWD = "bd2015";
 	static final Requete req = new Requete();
-	
-	static String IdClient = null;
+
+	static String idClient = null;
 
 	private static void connexion() {
 
@@ -40,7 +40,6 @@ public class Client {
 
 	static Connection conn;
 	static Statement stmt;
-	
 
 	private static void menu() {
 
@@ -50,7 +49,7 @@ public class Client {
 		System.out.println("2 : Connexion");
 		System.out.println("3 : Créer un album");
 		System.out.println("4 : Télécharger une image");
-		System.out.println("5 : DÃ©clarer une nouvelle maladie pour un animal (et mettre Ã  jour son nombre de maladie)");
+		System.out.println("5 : Ajouter des images dans un album");
 		System.out.println("6 : Commit");
 		System.out.println("7 : Test DeadLock");
 		System.out.println("8 : setIsolation");
@@ -60,46 +59,48 @@ public class Client {
 		System.out.println("12 : Rollback");
 	}
 
+	private static void menuConnexion() {
+
+		System.out.println("*** Choisir une action a effectuer : ***");
+		System.out.println("0 : Quitter");
+		System.out.println("1 : S'inscrire");
+		System.out.println("2 : Se connecter");
+	}
+
 	private static void creerClient() throws SQLException {
 		req.createClient(stmt);
+		connexionClient();
 	}
-	
+
 	private static void connexionClient() throws SQLException {
-		IdClient = req.connexionClient(stmt);
+		//idClient = req.connexionClient(stmt);
+		idClient="3";
 	}
 
 	private static void creerAlbum() throws SQLException {
-		req.createAlbum(stmt, IdClient);
+		req.createAlbum(stmt, idClient);
 
 	}
 
 	private static void AddImage() throws SQLException {
-		req.getContenuTable(stmt);
+		req.AddImage(stmt, idClient);
 	}
-		
 
 	private static void dropTable() throws SQLException {
 		req.dropTable(stmt);
 
 	}
-	
+
 	private static void test() throws SQLException {
 		stmt.executeQuery("drop table test");
-		//req.executeFile(stmt, "src/main/resources/test.sql");
+		// req.executeFile(stmt, "src/main/resources/test.sql");
 
-		//stmt.executeQuery("insert into test values (12, 'Spinnard')");
-		//stmt.executeQuery("insert into test values (13, 'Spinnardo')");
+		// stmt.executeQuery("insert into test values (12, 'Spinnard')");
+		// stmt.executeQuery("insert into test values (13, 'Spinnardo')");
 	}
 
-	private static void Q4() throws SQLException {
-		int var = LectureClavier.lireEntier("nouvelle valeur");
-		stmt.executeUpdate("update LesGardiens set noCage=" + var + " where nomE='Labbe' and noCage=12");
-	}
-
-	private static void Q5() throws SQLException {
-		stmt.executeQuery("insert into LesMaladies values ('Alexis','Sida')");
-		stmt.executeUpdate(
-				"update LesAnimaux set nb_maladies=(select nb_maladies from LesAnimaux where nomA='Alexis')+1 where nomA='Alexis'");
+	private static void AjouterImageDansAlbum() throws SQLException {
+		req.ajouterImageDansAlbum(stmt, idClient);
 	}
 
 	private static void commit() throws SQLException {
@@ -130,6 +131,22 @@ public class Client {
 
 			connexion();
 
+			menuConnexion();
+			action = LectureClavier.lireEntier("votre choix ?");
+			switch (action) {
+			case 0:
+				exit = true;
+				break;
+			case 1:
+				creerClient();
+				break;
+			case 2:
+				connexionClient();
+				break;
+			default:
+				System.out.println("=> choix incorrect");
+				menu();
+			}
 			while (!exit) {
 				menu();
 				action = LectureClavier.lireEntier("votre choix ?");
@@ -150,7 +167,7 @@ public class Client {
 					AddImage();
 					break;
 				case 5:
-					Q5();
+					AjouterImageDansAlbum();
 					break;
 				case 6:
 					commit();

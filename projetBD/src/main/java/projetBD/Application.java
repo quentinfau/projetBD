@@ -127,7 +127,10 @@ public class Application {
 					req.insertIntoTable(stmt);
 					break;
 				case 3:
-					req.getContenuTable(stmt);
+					System.out.println("Quel table voulez vous afficher ?");
+					req.listerTables(stmt);
+					String nomTable = LectureClavier.lireChaine();
+					req.getContenuTable(stmt, nomTable);
 					break;
 				case 4:
 					req.createTrigger(stmt);

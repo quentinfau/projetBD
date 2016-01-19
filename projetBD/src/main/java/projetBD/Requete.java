@@ -81,6 +81,107 @@ public class Requete {
 		dropTable(stmt);
 		executeFile(stmt, RESOURCES + "table.sql");
 	}
+	
+	public void createClient(Statement stmt) {
+		System.out.println("Entrer le prénom du client");
+		String prenom = LectureClavier.lireChaine();
+		System.out.println("Entrer le nom du client");
+		String nom = LectureClavier.lireChaine();
+		System.out.println("Entrer le mail du client");
+		String mail = LectureClavier.lireChaine();
+		System.out.println("Entrer le mot de passe du client");
+		String pw = LectureClavier.lireChaine();
+		System.out.println("Entrer le adresse du client");
+		String adresse = LectureClavier.lireChaine();
+		String sql = "insert into Client values(IdClient.NEXTVAL,'" + prenom
+				+ "','" + nom + "','" + mail + "','" + pw + "','" + adresse
+				+ "');";
+		try {
+			stmt.executeUpdate(sql);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public String connexionClient(Statement stmt) {
+		System.out.println("Entrer votre prénom :");
+		String prenom = LectureClavier.lireChaine();
+		System.out.println("Entrer votre mot de passe :");
+		String pw = LectureClavier.lireChaine();
+
+		String sql = "Select IdClient FROM Client Where FirstName='" + prenom
+				+ "' AND password='" + pw + "';";
+		ResultSet res;
+		String retour = null;
+		try {
+			res = stmt.executeQuery(sql);
+			res.next();
+			retour = res.getString(1);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return retour;
+	}
+	
+	public void createAlbum(Statement stmt, String IdClient) {
+		System.out.println("Quel type voulez-vous ? ");
+		System.out.println("1 : Album ");
+		System.out.println("2 : Agenda ");
+		System.out.println("3 : Calendrier ");
+		System.out.println("4 : Livre ");
+		String choice = LectureClavier.lireChaine();
+		String sql= null;
+		
+		sql = "insert into Album values(IdAlbum.NEXTVAL,'" + IdClient+ "');";
+		switch (choice) {
+		case "1":
+			
+			break;
+		case "2":
+			sql = "insert into Album values(IdAlbum.NEXTVAL,'" + IdClient+ "');";
+
+			break;
+		case "3":
+			sql = "insert into Album values(IdAlbum.NEXTVAL,'" + IdClient+ "');";
+			break;
+		case "4":
+			sql = "insert into Album values(IdAlbum.NEXTVAL,'" + IdClient+ "');";
+			break;
+		}
+		
+		String trig ="IdAlbum";
+		try {
+			stmt.executeUpdate(sql);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public void AddImage(Statement stmt, String IdClient) {
+		System.out.println("Entrer le chemin de votre image : ");
+		String path = LectureClavier.lireChaine();
+		System.out.println("Ajoutez des informations à votre image : ");
+		String info = LectureClavier.lireChaine();
+		System.out
+				.println("Voulez-vous partager l'image ? oui --> 1   /  non --> 0 ");
+		String share = LectureClavier.lireChaine();
+		String sql = "insert into Image(IdImage, IdClient, PathImage, Shared, ResolutionImage, Info) "
+				+ "values(IdImage.NEXTVAL,'"
+				+ IdClient
+				+ "','"
+				+ path
+				+ "','"
+				+ share + "',16,'" + info + "');";
+		try {
+			stmt.executeUpdate(sql);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	public void dropTable(Statement stmt) {
 		executeFile(stmt, RESOURCES + "drop.sql");

@@ -80,7 +80,7 @@ create table Album  (
 	IdAlbum int NOT NULL, 
 	IdClient int NOT NULL, 
 	NbPages int,
-	NameAlbum varchar(50), 
+	NameAlbum varchar(50),
 	primary key (IdAlbum),
 	constraint Album_C1 foreign key (IdClient) references Client(IdClient) 
 );

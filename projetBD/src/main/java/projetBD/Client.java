@@ -2,6 +2,7 @@ package projetBD;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -51,7 +52,7 @@ public class Client {
 		System.out.println("4 : Télécharger une image");
 		System.out.println("5 : Ajouter des images dans un album");
 		System.out.println("6 : Commit");
-		System.out.println("7 : Test DeadLock");
+		System.out.println("7 : Supprimer une image");
 		System.out.println("8 : setIsolation");
 		System.out.println("9 : Rollback");
 		System.out.println("10 : Drop table");
@@ -73,8 +74,8 @@ public class Client {
 	}
 
 	private static void connexionClient() throws SQLException {
-		//idClient = req.connexionClient(stmt);
-		idClient="3";
+		idClient = req.connexionClient(stmt);
+		
 	}
 
 	private static void creerAlbum() throws SQLException {
@@ -111,11 +112,8 @@ public class Client {
 		conn.rollback();
 	}
 
-	private static void testDeadLock() throws SQLException {
-		int var = LectureClavier.lireEntier("nouvelle valeur");
-		stmt.executeUpdate("update LesAnimaux set noCage=" + var + " where nomA='Alexis'");
-		var = LectureClavier.lireEntier("nouvelle valeur");
-		stmt.executeUpdate("update LesAnimaux set noCage=" + var + " where nomA='Tintin'");
+	private static void supprimerImage() throws SQLException {
+		req.supprimerImage(stmt, idClient);
 	}
 
 	private static void setIsolation() throws SQLException {
@@ -173,7 +171,7 @@ public class Client {
 					commit();
 					break;
 				case 7:
-					testDeadLock();
+					supprimerImage();
 					break;
 				case 8:
 					setIsolation();
@@ -185,7 +183,9 @@ public class Client {
 					dropTable();
 					break;
 				case 11:
-					test();
+					ResultSet res = stmt.executeQuery("Select Album.IdAlbum FROM Album LEFT join Calendar on Album.IdAlbum=Calendar.IdAlbum LEFT join Agenda on Agenda.IdAlbum=Album.IdAlbum LEFT join Book on Book.IdAlbum=Album.IdAlbum Where Calendar.IdAlbum is NULL AND Book.IdAlbum is NULL AND Agenda.IdAlbum is NULL");
+					res.next();
+					System.out.println(res.getString(1));
 					break;
 				default:
 					System.out.println("=> choix incorrect");

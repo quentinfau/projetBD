@@ -148,6 +148,7 @@ public class Requete {
 				System.out.println("Nom de l'album ?");
 				nameAlbum = LectureClavier.lireChaine();
 				sql = "insert into Album values(IdAlbum.NEXTVAL," + IdClient + "," + nbPage + ",'" + nameAlbum + "')";
+				stmt.executeQuery(sql);
 				break;
 			case "2":
 				System.out.println("Quel type d'agenda (52s ou 365j) ?");
@@ -223,8 +224,7 @@ public class Requete {
 		getContenuTableWithCondition(stmt, "Photo", "idAlbum=" + idAlbum);
 
 		System.out.println("Voici les images disponibles pour vous : ");
-		getContenuTable(stmt, "Image", idClient);
-		getContenuTableWithCondition(stmt, "Image", "shared=1");
+		getContenuTableWithCondition(stmt, "Image", "shared=1 or idClient=" + idClient);
 		System.out.println("Entrez l'id de l'image a ajouté");
 		String idImage = LectureClavier.lireChaine();
 		System.out.println("Entrez le numéro de page");
@@ -389,6 +389,58 @@ public class Requete {
 			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	public void supprimerImage(Statement stmt, String idClient) {
+		ResultSet res;
+		System.out.println("Quel image voulez vous supprimer ?");
+		getContenuTable(stmt, "Image", idClient);
+		System.out.println("Entrez l'id de l'image a supprimé");
+		String idImage = LectureClavier.lireChaine();
+		try {
+			res = stmt.executeQuery("select shared from Image where idImage=" + idImage);
+			res.next();
+			String shared = res.getString(1);
+			if (shared.equals("1")) {
+				System.out.println("1..");
+				String status = "";
+				res = stmt.executeQuery(
+						"select status from orders where idOrder in (select idOrder from Article where idAlbum in (select idAlbum from Photo where idImage="
+								+ idImage + "))");
+				
+				if (res.next()) {
+				    do {
+				    	if (res.getString("Status").equals("en cours")) {
+							status = "en cours";
+							}
+				    } while(res.next());
+				} else {
+					status = "";
+				}
+				System.out.println("2..");
+				res = stmt.executeQuery(
+						"select * from Client where idClient in (select idClient from Album where idAlbum in (select idAlbum from Photo where idImage="
+								+ idImage + "))");
+				while (res.next()) {
+					System.out.println("4..");
+					String mail = res.getString("Mail");
+					System.out.println("envoie d'un mail à " + mail + " : l'image " + idImage + " a été supprimé");
+				}
+				if (status.equals("en cours")) {
+					stmt.executeUpdate("insert into TempImageForDelete values (" + idImage + ")");
+				} else {
+					stmt.executeUpdate("delete from image where idImage=" + idImage);
+				}
+				
+				System.out.println("5..");
+			} else {
+				System.out.println("3..");
+				stmt.executeUpdate("delete from image where idImage=" + idImage);
+			}
+		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 

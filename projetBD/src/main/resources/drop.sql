@@ -13,6 +13,9 @@ drop table Client ;
 drop table Supply ;
 drop table Prestataire ;
 drop table Formats ;
+drop table TempImageForDelete;
+drop table TempClientForDelete;
+	
 
 
 drop sequence IdSupply;

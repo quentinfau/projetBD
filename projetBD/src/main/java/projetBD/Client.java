@@ -55,9 +55,9 @@ public class Client {
 		System.out.println("7 : Supprimer une image");
 		System.out.println("8 : Passer une commande");
 		System.out.println("9 : Suivre une commande");
-		System.out.println("10 : Drop table");
-		System.out.println("11 : Test");
-		System.out.println("12 : Rollback");
+		System.out.println("10 : Supprimer album");
+		System.out.println("11 : Supprimer une photo");
+		System.out.println("12 : Drop table");
 	}
 
 	private static void menuConnexion() {
@@ -159,6 +159,22 @@ public class Client {
 		}
 	}
 
+	private static void supprimerAlbum() throws SQLException {
+		if (req.DeleteAlbum(stmt, idClient)) {
+			commit();
+		} else {
+			rollback();
+		}
+	}
+
+	private static void supprimerPhoto() throws SQLException {
+		if (req.DeletePhoto(stmt, idClient)) {
+			commit();
+		} else {
+			rollback();
+		}
+	}
+
 	private static void passerCommande() throws SQLException {
 		if (req.passerCommande(stmt, idClient)) {
 			commit();
@@ -231,13 +247,14 @@ public class Client {
 					suiviCommande();
 					break;
 				case 10:
-					dropTable();
+					supprimerAlbum();
 					break;
 				case 11:
-					ResultSet res = stmt.executeQuery(
-							"Select Album.IdAlbum FROM Album LEFT join Calendar on Album.IdAlbum=Calendar.IdAlbum LEFT join Agenda on Agenda.IdAlbum=Album.IdAlbum LEFT join Book on Book.IdAlbum=Album.IdAlbum Where Calendar.IdAlbum is NULL AND Book.IdAlbum is NULL AND Agenda.IdAlbum is NULL");
-					res.next();
-					System.out.println(res.getString(1));
+					supprimerPhoto();
+					break;
+					
+				case 12:
+					dropTable();
 					break;
 				default:
 					System.out.println("=> choix incorrect");

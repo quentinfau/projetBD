@@ -46,12 +46,11 @@ public class Application {
 		System.out.println("1 : Creer table");
 		System.out.println("2 : Remplir table");
 		System.out.println("3 : Afficher table");
-		System.out.println("4 : Test Trigger");
-		System.out
-				.println("5 : Déclarer une nouvelle maladie pour un animal (et mettre à jour son nombre de maladie)");
-		System.out.println("6 : Commit");
-		System.out.println("7 : Test DeadLock");
-		System.out.println("8 : setIsolation");
+		System.out.println("4 : Creer Trigger");
+		System.out.println("5 : Ajouter un prestataire");
+		System.out.println("6 : Supprimer un prestataire");
+		System.out.println("7 : Supprimer un client");
+		System.out.println("8 : Commit");
 		System.out.println("9 : Rollback");
 		System.out.println("10 : Drop table");
 		System.out.println("11 : Test");
@@ -151,16 +150,28 @@ public class Application {
 					}
 					break;
 				case 5:
-					Q5();
+					if (req.AddPrestataire(stmt)) {
+						commit();
+					} else {
+						rollback();
+					}
 					break;
 				case 6:
-					commit();
+					if (req.DeletePrestataire(stmt)) {
+						commit();
+					} else {
+						rollback();
+					}
 					break;
 				case 7:
-					testDeadLock();
+					if (req.DeleteClient(stmt)) {
+						commit();
+					} else {
+						rollback();
+					}
 					break;
 				case 8:
-					setIsolation();
+					commit();
 					break;
 				case 9:
 					rollback();

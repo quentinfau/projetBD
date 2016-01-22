@@ -172,3 +172,9 @@ create table TempImageForDelete (
 	primary key(IdImage),
 	constraint TEMPIMAGE_C1 foreign key (IdImage) references Image(IdImage)
 );
+
+create table TempClientForDelete (
+	IdClient int NOT NULL,
+	primary key(IdClient),
+	constraint TEMPIMAGE_C1 foreign key (IdClient) references Client(IdClient)
+);

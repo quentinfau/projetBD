@@ -1,4 +1,5 @@
 drop table TempImageForDelete;
+drop table TempClientForDelete;
 drop table Agenda ;
 drop table Calendar ;
 drop table Book ;
@@ -13,10 +14,6 @@ drop table Client ;
 drop table Supply ;
 drop table Prestataire ;
 drop table Formats ;
-drop table TempImageForDelete;
-drop table TempClientForDelete;
-	
-
 
 drop sequence IdSupply;
 drop sequence IdArticle;

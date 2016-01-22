@@ -123,14 +123,6 @@ public class Client {
 
 	}
 
-	private static void test() throws SQLException {
-		stmt.executeQuery("drop table test");
-		// req.executeFile(stmt, "src/main/resources/test.sql");
-
-		// stmt.executeQuery("insert into test values (12, 'Spinnard')");
-		// stmt.executeQuery("insert into test values (13, 'Spinnardo')");
-	}
-
 	private static void AjouterImageDansAlbum() throws SQLException {
 		if (req.ajouterImageDansAlbum(stmt, idClient)) {
 			commit();
@@ -159,6 +151,14 @@ public class Client {
 		}
 	}
 
+	private static void passerCommande() throws SQLException {
+		if (req.passerCommande(stmt, idClient)) {
+			commit();
+		} else {
+			rollback();
+		}
+	}
+
 	private static void supprimerAlbum() throws SQLException {
 		if (req.DeleteAlbum(stmt, idClient)) {
 			commit();
@@ -169,14 +169,6 @@ public class Client {
 
 	private static void supprimerPhoto() throws SQLException {
 		if (req.DeletePhoto(stmt, idClient)) {
-			commit();
-		} else {
-			rollback();
-		}
-	}
-
-	private static void passerCommande() throws SQLException {
-		if (req.passerCommande(stmt, idClient)) {
 			commit();
 		} else {
 			rollback();
@@ -252,9 +244,15 @@ public class Client {
 				case 11:
 					supprimerPhoto();
 					break;
-					
+
 				case 12:
 					dropTable();
+					break;
+				case 13:
+					ResultSet res = stmt.executeQuery(
+							"Select Album.IdAlbum FROM Album LEFT join Calendar on Album.IdAlbum=Calendar.IdAlbum LEFT join Agenda on Agenda.IdAlbum=Album.IdAlbum LEFT join Book on Book.IdAlbum=Album.IdAlbum Where Calendar.IdAlbum is NULL AND Book.IdAlbum is NULL AND Agenda.IdAlbum is NULL");
+					res.next();
+					System.out.println(res.getString(1));
 					break;
 				default:
 					System.out.println("=> choix incorrect");

@@ -53,8 +53,8 @@ public class Client {
 		System.out.println("5 : Ajouter des images dans un album");
 		System.out.println("6 : Commit");
 		System.out.println("7 : Supprimer une image");
-		System.out.println("8 : setIsolation");
-		System.out.println("9 : Rollback");
+		System.out.println("8 : Passer une commande");
+		System.out.println("9 : Suivre une commande");
 		System.out.println("10 : Drop table");
 		System.out.println("11 : Test");
 		System.out.println("12 : Rollback");
@@ -75,7 +75,7 @@ public class Client {
 
 	private static void connexionClient() throws SQLException {
 		idClient = req.connexionClient(stmt);
-		
+
 	}
 
 	private static void creerAlbum() throws SQLException {
@@ -108,12 +108,20 @@ public class Client {
 		conn.commit();
 	}
 
+	private static void suiviCommande() {
+		req.suiviCommande(stmt, idClient);
+	}
+
 	private static void rollback() throws SQLException {
 		conn.rollback();
 	}
 
 	private static void supprimerImage() throws SQLException {
 		req.supprimerImage(stmt, idClient);
+	}
+
+	private static void passerCommande() {
+		req.passerCommande(stmt, idClient);
 	}
 
 	private static void setIsolation() throws SQLException {
@@ -174,16 +182,17 @@ public class Client {
 					supprimerImage();
 					break;
 				case 8:
-					setIsolation();
+					passerCommande();
 					break;
 				case 9:
-					rollback();
+					suiviCommande();
 					break;
 				case 10:
 					dropTable();
 					break;
 				case 11:
-					ResultSet res = stmt.executeQuery("Select Album.IdAlbum FROM Album LEFT join Calendar on Album.IdAlbum=Calendar.IdAlbum LEFT join Agenda on Agenda.IdAlbum=Album.IdAlbum LEFT join Book on Book.IdAlbum=Album.IdAlbum Where Calendar.IdAlbum is NULL AND Book.IdAlbum is NULL AND Agenda.IdAlbum is NULL");
+					ResultSet res = stmt.executeQuery(
+							"Select Album.IdAlbum FROM Album LEFT join Calendar on Album.IdAlbum=Calendar.IdAlbum LEFT join Agenda on Agenda.IdAlbum=Album.IdAlbum LEFT join Book on Book.IdAlbum=Album.IdAlbum Where Calendar.IdAlbum is NULL AND Book.IdAlbum is NULL AND Agenda.IdAlbum is NULL");
 					res.next();
 					System.out.println(res.getString(1));
 					break;

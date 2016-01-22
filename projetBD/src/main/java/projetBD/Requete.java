@@ -6,8 +6,9 @@ import java.io.FileReader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.chrono.IsoChronology;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -103,6 +104,12 @@ public class Requete {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public String getDate() {
+		Date aujourdhui = new Date();
+		DateFormat shortDateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+		return shortDateFormat.format(aujourdhui);
 	}
 
 	public String connexionClient(Statement stmt) {
@@ -394,6 +401,82 @@ public class Requete {
 
 	}
 
+	public void suiviCommande(Statement stmt1, String idClient) {
+		try {
+			Statement stmt2 = stmt1.getConnection().createStatement();
+			System.out.println("Voici vos commandes : ");
+			getContenuTable(stmt1, "Orders", idClient);
+			System.out.println("De quel commande voulez vous voir le details: ");
+			String idOrder = LectureClavier.lireChaine();
+			ResultSet resArticle, res;
+
+			resArticle = stmt1.executeQuery("select * from Article where idOrder=" + idOrder);
+			System.out.println("cette commande concerne : ");
+			while (resArticle.next()) {
+				res = stmt2.executeQuery("select * from Album where idAlbum=" + resArticle.getString("idAlbum"));
+				while (res.next()) {
+					System.out.print("- L'album " + res.getString("nameAlbum"));
+				}
+				res = stmt2.executeQuery("select * from Formats where idFormat=" + resArticle.getString("idFormat"));
+				while (res.next()) {
+					System.out.print(" dans le format " + res.getString("label"));
+				}
+				res = stmt2.executeQuery("select * from Supply where idSupply=" + resArticle.getString("idSupply"));
+				while (res.next()) {
+					System.out.print(" --> livraison : " + res.getString("statusSup"));
+				}
+				System.out.println();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	public void passerCommande(Statement stmt, String idClient) {
+		ResultSet res;
+		try {
+			stmt.executeUpdate("insert into Orders values (IdOrder.NEXTVAL, TO_DATE('" + getDate()
+					+ "', 'DD/MM/YY HH:MI') , 0, " + idClient + ", 'en cours')");
+			res = stmt.executeQuery("select IdOrder.currval from dual");
+			res.next();
+			String idOrder = res.getString(1);
+
+			String continuer = "y";
+			String idAlbum, idFormat, quantity;
+			while (continuer.equals("y")) {
+				System.out.println("Voici vos albums : ");
+				getContenuTable(stmt, "Album", idClient);
+				System.out.println("Entrez l'id de l'album choisi : ");
+				idAlbum = LectureClavier.lireChaine();
+				System.out.println("Format disponible");
+				getContenuTable(stmt, "Formats");
+				System.out.println("Entrez l'id du format voulu");
+				idFormat = LectureClavier.lireChaine();
+				System.out.println("Quel quantité ?");
+				quantity = LectureClavier.lireChaine();
+				if (!idAlbum.equals("") || !idFormat.equals("") || !quantity.equals("")) {
+
+					stmt.executeUpdate("insert into Supply values (IdSupply.NEXTVAL, TO_DATE('" + getDate()
+							+ "', 'DD/MM/YY HH:MI') , 'en cours')");
+					res = stmt.executeQuery("select IdSupply.currval from dual");
+					res.next();
+					String idSupply = res.getString(1);
+					stmt.executeUpdate("insert into Article values (IdArticle.NEXTVAL, " + idOrder + "," + idAlbum + ","
+							+ idSupply + ", " + idFormat + ", " + quantity + ")");
+
+				} else {
+					// rollback
+				}
+				System.out.println("Ajouter d'autres articles ? (y or n)");
+				continuer = LectureClavier.lireChaine();
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	public void supprimerImage(Statement stmt, String idClient) {
 		ResultSet res;
 		System.out.println("Quel image voulez vous supprimer ?");
@@ -410,13 +493,13 @@ public class Requete {
 				res = stmt.executeQuery(
 						"select status from orders where idOrder in (select idOrder from Article where idAlbum in (select idAlbum from Photo where idImage="
 								+ idImage + "))");
-				
+
 				if (res.next()) {
-				    do {
-				    	if (res.getString("Status").equals("en cours")) {
+					do {
+						if (res.getString("Status").equals("en cours")) {
 							status = "en cours";
-							}
-				    } while(res.next());
+						}
+					} while (res.next());
 				} else {
 					status = "";
 				}
@@ -434,7 +517,7 @@ public class Requete {
 				} else {
 					stmt.executeUpdate("delete from image where idImage=" + idImage);
 				}
-				
+
 				System.out.println("5..");
 			} else {
 				System.out.println("3..");

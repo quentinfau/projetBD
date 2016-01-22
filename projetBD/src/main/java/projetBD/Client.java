@@ -84,7 +84,11 @@ public class Client {
 	}
 
 	private static void AddImage() throws SQLException {
-		req.AddImage(stmt, idClient);
+		if (req.AddImage(stmt, idClient)) {
+			commit();
+		} else {
+			rollback();
+		}
 	}
 
 	private static void dropTable() throws SQLException {
@@ -101,7 +105,11 @@ public class Client {
 	}
 
 	private static void AjouterImageDansAlbum() throws SQLException {
-		req.ajouterImageDansAlbum(stmt, idClient);
+		if (req.ajouterImageDansAlbum(stmt, idClient)) {
+			commit();
+		} else {
+			rollback();
+		}
 	}
 
 	private static void commit() throws SQLException {
@@ -117,11 +125,19 @@ public class Client {
 	}
 
 	private static void supprimerImage() throws SQLException {
-		req.supprimerImage(stmt, idClient);
+		if (req.supprimerImage(stmt, idClient)) {
+			commit();
+		} else {
+			rollback();
+		}
 	}
 
-	private static void passerCommande() {
-		req.passerCommande(stmt, idClient);
+	private static void passerCommande() throws SQLException {
+		if (req.passerCommande(stmt, idClient)) {
+			commit();
+		} else {
+			rollback();
+		}
 	}
 
 	private static void setIsolation() throws SQLException {

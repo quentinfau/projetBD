@@ -26,7 +26,7 @@ CREATE SEQUENCE IdSupply
 create table Formats  (
 	IdFormat int, 
 	Label varchar(50), 
-	Price long, 
+	Price float, 
 	ResolutionMin int, 
 	Speed int, 
 	Stock int,
@@ -51,7 +51,7 @@ CREATE SEQUENCE IdPrestataire
 
 create table CodePromo(
 	IdPromo int NOT NULL, 
-	Amount long, 
+	Amount float, 
 	IdClient int,
 	primary key (IdPromo),
 	constraint CodePromo_C1 foreign key (IdClient) references Client(IdClient) 
@@ -64,7 +64,7 @@ CREATE SEQUENCE IdPromo
 create table Orders  (
 	IdOrder int NOT NULL, 
 	DateOrder date, 
-	TotalPrice long, 
+	TotalPrice float, 
 	IdClient int,
 	Status varchar(50) CHECK( Status IN ('en cours','envoi complet', 'envoi partiel', 'annulee') ), 
 	primary key (IdOrder),
@@ -94,7 +94,7 @@ create table Article (
 	IdOrder int NOT NULL,
 	IdAlbum int NOT NULL, 
 	IdSupply int NOT NULL, 
-	IdFormat int NOT NULL,
+	IdFormat int NOT NULL, 
 	Quantity int,
 	primary key(IdArticle),
 	constraint ArticleFormat_C1 foreign key (IdFormat) references Formats(IdFormat),
@@ -140,7 +140,7 @@ create table Photo (
 	Comments varchar(50),
 	primary key(NumPage, IdAlbum),
 	constraint PhotoAlbum_C1 foreign key (IdAlbum) references Album(IdAlbum),
-	constraint PhotoImage_C2 foreign key (IdImage) references Image(IdImage)
+	constraint PhotoImage_C2 foreign key (IdImage) references Image(IdImage) on delete cascade
 );
 
 
@@ -165,4 +165,10 @@ create table Book (
 	BookTitle varchar(50), 
 	primary key(IdAlbum),
 	constraint Book_C1 foreign key (IdAlbum) references Album(IdAlbum) on delete cascade
+);
+
+create table TempImageForDelete (
+	IdImage int NOT NULL,
+	primary key(IdImage),
+	constraint TEMPIMAGE_C1 foreign key (IdImage) references Image(IdImage)
 );

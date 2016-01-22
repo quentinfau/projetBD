@@ -5,9 +5,9 @@ declare
 	n int;
 	p number;
 BEGIN
-	select IdClient, totalprice into n,p from Orders natural join Client;
+	select idClient, TotalPrice into n, p from Orders natural join client;
 	if (p > 100) then
-		insert into CodePromo values (1,p*0.05,n);
+	insert into CodePromo values (1,p,n);
 	end if;	
 END;
 /

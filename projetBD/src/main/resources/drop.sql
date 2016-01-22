@@ -1,3 +1,4 @@
+drop table TempImageForDelete;
 drop table Agenda ;
 drop table Calendar ;
 drop table Book ;

@@ -205,7 +205,7 @@ public class Requete {
 
 	}
 
-	public void AddImage(Statement stmt, String IdClient) {
+	public boolean AddImage(Statement stmt, String IdClient) {
 		System.out.println("Entrer le chemin de votre image : ");
 		String path = LectureClavier.lireChaine();
 		System.out.println("Ajoutez des informations à votre image : ");
@@ -217,12 +217,14 @@ public class Requete {
 		try {
 			stmt.executeUpdate(sql);
 			System.out.println("image ajouté");
+			return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return false;
 		}
 	}
 
-	public void ajouterImageDansAlbum(Statement stmt, String idClient) {
+	public boolean ajouterImageDansAlbum(Statement stmt, String idClient) {
 		System.out.println("Voici vos albums : ");
 		getContenuTable(stmt, "Album", idClient);
 		System.out.println("Entrez l'id de l'album concerné : ");
@@ -244,10 +246,11 @@ public class Requete {
 				+ "')";
 
 		try {
-			stmt.executeQuery(sql);
+			stmt.executeUpdate(sql);
+			return true;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return false;
 		}
 	}
 
@@ -433,11 +436,51 @@ public class Requete {
 
 	}
 
-	public void passerCommande(Statement stmt, String idClient) {
+	public boolean updatePrice(Statement stmt, String idClient, String idOrder) {
+		ResultSet resArticle, res;
+		Statement stmt2;
+		String quantity, price = "0", nbPages = "0";
+		Double totalPrice = 0.0;
+		try {
+			stmt2 = stmt.getConnection().createStatement();
+			resArticle = stmt.executeQuery("select * from Article where idOrder=" + idOrder);
+			while (resArticle.next()) {
+				quantity = resArticle.getString("quantity");
+				System.out.println(quantity);
+				res = stmt2.executeQuery("select nbPages from Album where idAlbum=" + resArticle.getString("idAlbum"));
+				while (res.next()) {
+					nbPages = res.getString("nbPages");
+				}
+				res = stmt2
+						.executeQuery("select price from Formats where idFormat=" + resArticle.getString("idFormat"));
+				while (res.next()) {
+					price = res.getString("price");
+				}
+				totalPrice = totalPrice + Double.valueOf(price) * Integer.valueOf(nbPages) * Integer.valueOf(quantity);
+
+			}
+			System.out.println("Le prix total de votre commande s'eleve à " + totalPrice
+					+ " , voulez vous validé votre commande et le paiement ? (y or n)");
+			String choix = LectureClavier.lireChaine();
+			if (choix.equals("y")) {
+				stmt.executeUpdate(
+						"update Orders set totalPrice=" + totalPrice.shortValue() + " where idOrder=" + idOrder);
+				return true;
+			} else {
+				System.out.println("Commande annulée");
+				return false;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public boolean passerCommande(Statement stmt, String idClient) {
 		ResultSet res;
 		try {
 			stmt.executeUpdate("insert into Orders values (IdOrder.NEXTVAL, TO_DATE('" + getDate()
-					+ "', 'DD/MM/YY HH:MI') , 0, " + idClient + ", 'en cours')");
+					+ "', 'DD/MM/YY HH24:MI') , 0, " + idClient + ", 'en cours')");
 			res = stmt.executeQuery("select IdOrder.currval from dual");
 			res.next();
 			String idOrder = res.getString(1);
@@ -458,7 +501,7 @@ public class Requete {
 				if (!idAlbum.equals("") || !idFormat.equals("") || !quantity.equals("")) {
 
 					stmt.executeUpdate("insert into Supply values (IdSupply.NEXTVAL, TO_DATE('" + getDate()
-							+ "', 'DD/MM/YY HH:MI') , 'en cours')");
+							+ "', 'DD/MM/YY HH24:MI') , 'en cours')");
 					res = stmt.executeQuery("select IdSupply.currval from dual");
 					res.next();
 					String idSupply = res.getString(1);
@@ -466,18 +509,20 @@ public class Requete {
 							+ idSupply + ", " + idFormat + ", " + quantity + ")");
 
 				} else {
-					// rollback
+					return false;
 				}
 				System.out.println("Ajouter d'autres articles ? (y or n)");
 				continuer = LectureClavier.lireChaine();
 			}
+			return updatePrice(stmt, idClient, idOrder);
+
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return false;
 		}
 	}
 
-	public void supprimerImage(Statement stmt, String idClient) {
+	public boolean supprimerImage(Statement stmt, String idClient) {
 		ResultSet res;
 		System.out.println("Quel image voulez vous supprimer ?");
 		getContenuTable(stmt, "Image", idClient);
@@ -488,7 +533,6 @@ public class Requete {
 			res.next();
 			String shared = res.getString(1);
 			if (shared.equals("1")) {
-				System.out.println("1..");
 				String status = "";
 				res = stmt.executeQuery(
 						"select status from orders where idOrder in (select idOrder from Article where idAlbum in (select idAlbum from Photo where idImage="
@@ -503,12 +547,10 @@ public class Requete {
 				} else {
 					status = "";
 				}
-				System.out.println("2..");
 				res = stmt.executeQuery(
 						"select * from Client where idClient in (select idClient from Album where idAlbum in (select idAlbum from Photo where idImage="
 								+ idImage + "))");
 				while (res.next()) {
-					System.out.println("4..");
 					String mail = res.getString("Mail");
 					System.out.println("envoie d'un mail à " + mail + " : l'image " + idImage + " a été supprimé");
 				}
@@ -517,15 +559,14 @@ public class Requete {
 				} else {
 					stmt.executeUpdate("delete from image where idImage=" + idImage);
 				}
-
-				System.out.println("5..");
 			} else {
-				System.out.println("3..");
 				stmt.executeUpdate("delete from image where idImage=" + idImage);
+
 			}
+			return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return false;
 		}
-
 	}
 }

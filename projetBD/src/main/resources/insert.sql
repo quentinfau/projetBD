@@ -14,7 +14,7 @@ insert into Prestataire (IdPrestataire, NamePresta, AddressPresta, Preference) v
 
 insert into Image (IdImage, IdClient, PathImage, Shared, ResolutionImage, Info) values(IdImage.NEXTVAL,3,'./image', 0,5,'Vancances plage ');
 insert into Image (IdImage, IdClient, PathImage, Shared, ResolutionImage, Info) values(IdImage.NEXTVAL,2,'./image',1,20,'Vancances Berlin ');
-insert into Image (IdImage, IdClient, PathImage, Shared, ResolutionImage, Info) values(IdImage.NEXTVAL,2,'./images',0,16,'Vancances hiver ');
+insert into Image (IdImage, IdClient, PathImage, Shared, ResolutionImage, Info) values(IdImage.NEXTVAL,2,'./images',1,16,'Vancances hiver ');
 
 
 insert into Orders (IdOrder, DateOrder, TotalPrice, IdClient, Status ) values (IdOrder.NEXTVAL, SYSDATE , 90, 3, 'en cours');
@@ -49,7 +49,10 @@ insert into Contact (IdPrestataire, IdFormat , LimitTime) values (2, 2, 48);
 insert into Photo (NumPage, IdAlbum, IdImage, Title, Comments ) values (2, 3, 3, 'photo identité', 'mise hier');		
 insert into Photo (NumPage, IdAlbum, IdImage, Title, Comments ) values (3, 2, 3, 'photo identité', 'mise hier');		
 insert into Photo (NumPage, IdAlbum, IdImage, Title, Comments ) values (1, 3, 4, 'photo identité', 'mise hier');		
-	
+insert into Photo (NumPage, IdAlbum, IdImage, Title, Comments ) values (1, 2, 3, 'photo identité', 'mise hier');		
+insert into Photo (NumPage, IdAlbum, IdImage, Title, Comments ) values (3, 3, 3, 'photo identité', 'mise hier');		
+insert into Photo (NumPage, IdAlbum, IdImage, Title, Comments ) values (1, 4, 3, 'photo identité', 'mise hier');		
+		
 	
 insert into Calendar (IdAlbum, TypeCalendar) values (2, 'Mural');
 	
@@ -57,4 +60,3 @@ insert into Agenda (IdAlbum, TypeAgenda) values (3, '52s');
 
  
 insert into Book (IdAlbum, Preface, PostFace, BookTitle) values(4, 'Preface', 'PostFace', 'Mon Livre');
-	

@@ -94,7 +94,11 @@ public class Application {
 	private static void closeConnection(Statement stmt) {
 
 		try {
-			req.cleanImageAfterLogoff(stmt);
+			if (req.cleanImageAfterLogoff(stmt)) {
+				commit();
+			} else {
+				rollback();
+			}
 			stmt.close();
 
 			conn.close();
@@ -120,10 +124,18 @@ public class Application {
 					exit = true;
 					break;
 				case 1:
-					req.createTable(stmt);
+					if (req.createTable(stmt)) {
+						commit();
+					} else {
+						rollback();
+					}
 					break;
 				case 2:
-					req.insertIntoTable(stmt);
+					if (req.insertIntoTable(stmt)) {
+						commit();
+					} else {
+						rollback();
+					}
 					break;
 				case 3:
 					System.out.println("Quel table voulez vous afficher ?");
@@ -132,7 +144,11 @@ public class Application {
 					req.getContenuTable(stmt, nomTable);
 					break;
 				case 4:
-					req.createTrigger(stmt);
+					if (req.createTrigger(stmt)) {
+						commit();
+					} else {
+						rollback();
+					}
 					break;
 				case 5:
 					Q5();
@@ -150,7 +166,11 @@ public class Application {
 					rollback();
 					break;
 				case 10:
-					req.dropTable(stmt);
+					if (req.dropTable(stmt)) {
+						commit();
+					} else {
+						rollback();
+					}
 					break;
 				case 11:
 					test();

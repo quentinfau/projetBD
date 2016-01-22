@@ -15,7 +15,7 @@ import java.util.List;
 public class Requete {
 	static final String RESOURCES = "src/main/resources/";
 
-	public void createTrigger(Statement stmt) {
+	public boolean createTrigger(Statement stmt) {
 
 		System.out.println("nom du fichier trigger.sql ?");
 		String name = LectureClavier.lireChaine();
@@ -37,7 +37,7 @@ public class Requete {
 			br.close();
 			stmt.execute(sb.toString());
 			System.out.println(">>" + sb);
-
+			return true;
 		} catch (Exception e) {
 			System.out.println("*** Error : " + e.toString());
 			System.out.println("*** ");
@@ -45,10 +45,11 @@ public class Requete {
 			e.printStackTrace();
 			System.out.println("################################################");
 			System.out.println(sb.toString());
+			return false;
 		}
 	}
 
-	public void executeFile(Statement stmt, String file) {
+	public boolean executeFile(Statement stmt, String file) {
 		String s = new String();
 		StringBuffer sb = new StringBuffer();
 
@@ -69,6 +70,7 @@ public class Requete {
 					System.out.println(">>" + inst[i]);
 				}
 			}
+			return true;
 		} catch (Exception e) {
 			System.out.println("*** Error : " + e.toString());
 			System.out.println("*** ");
@@ -76,15 +78,16 @@ public class Requete {
 			e.printStackTrace();
 			System.out.println("################################################");
 			System.out.println(sb.toString());
+			return false;
 		}
 	}
 
-	public void createTable(Statement stmt) {
+	public boolean createTable(Statement stmt) {
 		dropTable(stmt);
-		executeFile(stmt, RESOURCES + "table.sql");
+		return executeFile(stmt, RESOURCES + "table.sql");
 	}
 
-	public void createClient(Statement stmt) {
+	public boolean createClient(Statement stmt) {
 		System.out.println("Entrer le prénom du client");
 		String prenom = LectureClavier.lireChaine();
 		System.out.println("Entrer le nom du client");
@@ -100,9 +103,10 @@ public class Requete {
 		try {
 			stmt.executeUpdate(sql);
 			System.out.println("Client créée");
+			return true;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return false;
 		}
 	}
 
@@ -136,7 +140,7 @@ public class Requete {
 		return retour;
 	}
 
-	public void createAlbum(Statement stmt, String IdClient) {
+	public boolean createAlbum(Statement stmt, String IdClient) {
 		System.out.println("Quel type voulez-vous ? ");
 		System.out.println("1 : Album ");
 		System.out.println("2 : Agenda ");
@@ -181,7 +185,7 @@ public class Requete {
 
 				break;
 			case "3":
-				System.out.println("Quel type de calendrier (bureau ou mural) ?");
+				System.out.println("Quel type de calendrier (Bureau ou Mural) ?");
 				String typeCalendar = LectureClavier.lireChaine();
 				System.out.println("Nom du calendrier ?");
 				nameAlbum = LectureClavier.lireChaine();
@@ -192,15 +196,16 @@ public class Requete {
 				sql = "select IdAlbum.currval from dual";
 				res = stmt.executeQuery(sql);
 				res.next();
-				sql = "insert into Agenda values(" + res.getString(1) + ",'" + typeCalendar + "')";
+				sql = "insert into Calendar values(" + res.getString(1) + ",'" + typeCalendar + "')";
 				stmt.executeQuery(sql);
 				break;
 			case "4":
 				break;
 			}
+			return true;
 		} catch (SQLException e1) {
-
 			e1.printStackTrace();
+			return false;
 		}
 
 	}
@@ -254,12 +259,12 @@ public class Requete {
 		}
 	}
 
-	public void dropTable(Statement stmt) {
-		executeFile(stmt, RESOURCES + "drop.sql");
+	public boolean dropTable(Statement stmt) {
+		return executeFile(stmt, RESOURCES + "drop.sql");
 	}
 
-	public void insertIntoTable(Statement stmt) {
-		executeFile(stmt, RESOURCES + "insert.sql");
+	public boolean insertIntoTable(Statement stmt) {
+		return executeFile(stmt, RESOURCES + "insert.sql");
 	}
 
 	public void listerTables(Statement stmt) {
@@ -387,8 +392,7 @@ public class Requete {
 		}
 	}
 
-	public void cleanImageAfterLogoff(Statement stmt) {
-
+	public boolean cleanImageAfterLogoff(Statement stmt) {
 		ResultSet res;
 		try {
 			res = stmt.executeQuery(
@@ -397,9 +401,10 @@ public class Requete {
 				String idImage = res.getString("idImage");
 				stmt.executeUpdate("delete from image where idImage=" + idImage);
 			}
+			return true;
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return false;
 		}
 
 	}

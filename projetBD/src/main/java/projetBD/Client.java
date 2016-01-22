@@ -71,7 +71,11 @@ public class Client {
 	private static void closeConnection(Statement stmt) {
 
 		try {
-			req.cleanImageAfterLogoff(stmt);
+			if (req.cleanImageAfterLogoff(stmt)) {
+				commit();
+			} else {
+				rollback();
+			}
 			stmt.close();
 
 			conn.close();
@@ -81,7 +85,11 @@ public class Client {
 	}
 
 	private static void creerClient() throws SQLException {
-		req.createClient(stmt);
+		if (req.createClient(stmt)) {
+			commit();
+		} else {
+			rollback();
+		}
 		connexionClient();
 	}
 
@@ -91,8 +99,11 @@ public class Client {
 	}
 
 	private static void creerAlbum() throws SQLException {
-		req.createAlbum(stmt, idClient);
-
+		if (req.createAlbum(stmt, idClient)) {
+			commit();
+		} else {
+			rollback();
+		}
 	}
 
 	private static void AddImage() throws SQLException {
@@ -104,7 +115,11 @@ public class Client {
 	}
 
 	private static void dropTable() throws SQLException {
-		req.dropTable(stmt);
+		if (req.dropTable(stmt)) {
+			commit();
+		} else {
+			rollback();
+		}
 
 	}
 
@@ -233,7 +248,7 @@ public class Client {
 			closeConnection(stmt);
 
 			System.out.println("au revoir");
-			
+
 			// traitement d'exception
 		} catch (SQLException e) {
 			System.err.println("failed");

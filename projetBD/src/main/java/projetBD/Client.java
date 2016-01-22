@@ -68,6 +68,18 @@ public class Client {
 		System.out.println("2 : Se connecter");
 	}
 
+	private static void closeConnection(Statement stmt) {
+
+		try {
+			req.cleanImageAfterLogoff(stmt);
+			stmt.close();
+
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 	private static void creerClient() throws SQLException {
 		req.createClient(stmt);
 		connexionClient();
@@ -218,12 +230,10 @@ public class Client {
 				}
 			}
 
-			// Liberation des ressources et fermeture de la connexion...
-			stmt.close();
-			conn.close();
+			closeConnection(stmt);
 
 			System.out.println("au revoir");
-
+			
 			// traitement d'exception
 		} catch (SQLException e) {
 			System.err.println("failed");

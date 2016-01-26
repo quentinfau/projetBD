@@ -1,4 +1,4 @@
-create or replace trigger trg_dateLivraison
+create or replace trigger trg_datelivraison
 After Insert or update ON Orders
 Declare 
 v date;
@@ -10,6 +10,4 @@ Select Orders.DateOrder, Orders.Status into v,s from Orders natural join Article
 	if (s = 'en cours') then
 insert into Supply(IdSupply, DateSup, StatusSup) values (1, v+2 ,'en cours'); 
      end if; 
-End;
-/
-								 					   
+End;							 					   

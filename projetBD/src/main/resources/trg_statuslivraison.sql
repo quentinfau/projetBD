@@ -1,4 +1,4 @@
-Create or Replace TRIGGER G5
+Create or Replace TRIGGER trg_statuslivraison
 After insert or Update on Orders
 For each row
 declare 

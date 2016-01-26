@@ -1,4 +1,4 @@
-create or replace trigger trg_Resolution
+create or replace trigger trg_resolution
 After Insert or update ON Article
 for each row
 Declare 
@@ -19,4 +19,3 @@ select Formats.ResolutionMin into resMin From Formats where Formats.IdFormat = i
   END LOOP;
 
 End;
-/

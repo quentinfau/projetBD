@@ -5,9 +5,10 @@ declare
 	n int;
 	p number;
 BEGIN
-	select idClient, TotalPrice into n, p from Orders natural join client;
+	n := :new.idClient;
+	p := :new.TotalPrice;
 	if (p > 100) then
-	insert into CodePromo values (1,p,n);
+	insert into CodePromo values (IdPromo.NEXTVAL,p*0.05,n);
 	end if;	
 END;
 /

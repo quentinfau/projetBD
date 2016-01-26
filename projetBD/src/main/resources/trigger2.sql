@@ -1,17 +1,22 @@
 create or replace trigger trg_Resolution
-After Insert or update ON Formats
+After Insert or update ON Article
+for each row
 Declare 
-v1 integer;
-v2 integer; 
+resImage integer;
+resMin integer;
+idF integer;
+idA integer;
 Begin 
-
-Select Image.ResolutionImage, Formats.ResolutionMin into v1, v2 From Image, Formats, Article, Client, Album 
-                                                         Where (Formats.IdFormat = Article.IdFormat
-														    and Article.IdAlbum=Album.IdAlbum
-														    and Album.IdClient= Client.IdClient 
-														    and Client.IdClient = Image.IdImage);
-							If 	(v1 < v2) then
-							 raise_application_error(-20105,'Probleme de Résolution');
+idF := :new.idFormat;
+idA := :new.idAlbum;
+	
+select Formats.ResolutionMin into resMin From Formats where Formats.IdFormat = idF ;
+ FOR j IN (select idImage from Photo where idAlbum=idA) LOOP
+    select Image.ResolutionImage into resImage From Image where Image.idImage = j.idImage;
+							If 	(resImage < resMin) then
+							 raise_application_error(-20105,'Probleme de Resolution');
 							end if;
+  END LOOP;
+
 End;
 /

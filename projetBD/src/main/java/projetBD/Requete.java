@@ -218,7 +218,7 @@ public class Requete {
 		System.out.println("Voulez-vous partager l'image ? oui --> 1   /  non --> 0 ");
 		String share = LectureClavier.lireChaine();
 		String sql = "insert into Image(IdImage, IdClient, PathImage, Shared, ResolutionImage, Info) "
-				+ "values(IdImage.NEXTVAL,'" + IdClient + "','" + path + "'," + share + ",16,'" + info + "')";
+				+ "values(IdImage.NEXTVAL,'" + IdClient + "','" + path + "'," + share + ",8,'" + info + "')";
 		try {
 			stmt.executeUpdate(sql);
 			System.out.println("image ajouté");
@@ -470,6 +470,7 @@ public class Requete {
 			if (choix.equals("y")) {
 				stmt.executeUpdate(
 						"update Orders set totalPrice=" + totalPrice.shortValue() + " where idOrder=" + idOrder);
+				System.out.println("Commande effectué");
 				return true;
 			} else {
 				System.out.println("Commande annulée");
@@ -660,7 +661,7 @@ public class Requete {
 	}
 
 	public boolean DeleteAlbum(Statement stmt, String idClient) {
-		System.out.println("Voici la liste de vos albums  : " + idClient);
+		System.out.println("Voici la liste de vos albums  : ");
 		getContenuTable(stmt, "Album", idClient);
 		System.out.println("Entrez l'id de l'album que vous voulez supprimer");
 		String IdAlbum = LectureClavier.lireChaine();

@@ -16,4 +16,3 @@ BEGIN
 		 update Supply set StatusSup= 'en cours';
 	end if;	
 END;
-/

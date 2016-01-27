@@ -14,6 +14,7 @@ CREATE SEQUENCE IdClient
 
 create table Supply  (
 	IdSupply int, 
+	IdPrestataire int,
 	DateSup date,
 	StatusSup varchar(50) CHECK( StatusSup IN ('en cours','envoye','annule') ),
 	primary key(IdSupply)

@@ -50,12 +50,11 @@ public class Application {
 		System.out.println("5 : Ajouter un prestataire");
 		System.out.println("6 : Supprimer un prestataire");
 		System.out.println("7 : Supprimer un client");
-		System.out.println("8 : Supprimer une Image");
-		System.out.println("9 : Commit");
-		System.out.println("10 : Rollback");
-		System.out.println("11 : Drop table");
-		System.out.println("12 : Test");
-		
+		System.out.println("8 : Commit");
+		System.out.println("9 : Rollback");
+		System.out.println("10 : Drop table");
+		System.out.println("11 : Test");
+		System.out.println("12 : Rollback");
 	}
 
 	private static void test() throws SQLException {
@@ -66,7 +65,11 @@ public class Application {
 		// stmt.executeQuery("insert into test values (13, 'Spinnardo')");
 	}
 
-	
+	private static void Q5() throws SQLException {
+		stmt.executeQuery("insert into LesMaladies values ('Alexis','Sida')");
+		stmt.executeUpdate(
+				"update LesAnimaux set nb_maladies=(select nb_maladies from LesAnimaux where nomA='Alexis')+1 where nomA='Alexis'");
+	}
 
 	private static void commit() throws SQLException {
 		conn.commit();
@@ -100,16 +103,6 @@ public class Application {
 			conn.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
-		}
-	}
-	
-	private static void supprimerImage() throws SQLException {
-		System.out.println("Entrez l'id du Client");
-		String idClient = LectureClavier.lireChaine();
-		if (req.supprimerImage(stmt, idClient)) {
-			commit();
-		} else {
-			rollback();
 		}
 	}
 
@@ -178,22 +171,19 @@ public class Application {
 					}
 					break;
 				case 8:
-					supprimerImage();
-					break;
-				case 9:
 					commit();
 					break;
-				case 10:
+				case 9:
 					rollback();
 					break;
-				case 11:
+				case 10:
 					if (req.dropTable(stmt)) {
 						commit();
 					} else {
 						rollback();
 					}
 					break;
-				case 12:
+				case 11:
 					test();
 					break;
 				default:

@@ -117,6 +117,14 @@ public class Client {
 		}
 	}
 
+	private static void albumClient() throws SQLException {
+		req.ListerAlbum(stmt, idClient);
+	}
+
+	private static void infoClient() throws SQLException {
+		req.infoClient(stmt, idClient);
+	}
+
 	private static void dropTable() throws SQLException {
 		if (req.dropTable(stmt)) {
 			commit();
@@ -181,13 +189,94 @@ public class Client {
 	private static void setIsolation() throws SQLException {
 		conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 	}
-	
-	private static void infoClient() throws SQLException{
-		req.infoClient(stmt, idClient);
+
+	private static void scenar1() throws SQLException {
+
+		scen.AddImage(stmt, idClient, "/Images/Martine.jpg", "0", 8, "Vancances martine");
+		ResultSet res = stmt.executeQuery("select IdImage.currval from dual ");
+		res.next();
+		String im1 = res.getString(1);
+
+		scen.AddImage(stmt, idClient, "/Images/ete.jpg", "0", 10, "Vancances été");
+		res = stmt.executeQuery("select IdImage.currval from dual ");
+		res.next();
+		String im2 = res.getString(1);
+
+		scen.AddImage(stmt, idClient, "/Images/hiver.jpg", "1", 18, "Vancances hiver");
+		res = stmt.executeQuery("select IdImage.currval from dual ");
+		res.next();
+		String im3 = res.getString(1);
+
+		scen.AddImage(stmt, idClient, "/Images/gateau.jpg", "1", 18, "Dessert");
+		res = stmt.executeQuery("select IdImage.currval from dual ");
+		res.next();
+		String im4 = res.getString(1);
+
+		scen.AddImage(stmt, idClient, "/Images/entree.jpg", "1", 18, "entree");
+		res = stmt.executeQuery("select IdImage.currval from dual ");
+		res.next();
+		String im5 = res.getString(1);
+
+		scen.AddImage(stmt, idClient, "/Images/chaud.jpg", "1", 18, "plat chaud");
+		res = stmt.executeQuery("select IdImage.currval from dual ");
+		res.next();
+		String im6 = res.getString(1);
+
+		System.out.println("Les images ont été ajoutées");
+		req.getContenuTableWithCondition(stmt, "IMAGE", "IdClient=" + idClient);
+		LectureClavier.lireChaine();
+		req.getContenuTableWithCondition(stmt, "Image", "idClient=" + idClient);
+		LectureClavier.lireChaine();
+
+		scen.createAlbum(stmt, idClient, "Martine en vacances", "book", "154");
+		res = stmt.executeQuery("select IdAlbum.currval from dual ");
+		res.next();
+		String idAlbum1 = res.getString(1);
+
+		scen.createAlbum(stmt, idClient, "Martine fait la cuisine", "book", "154");
+		res = stmt.executeQuery("select IdAlbum.currval from dual ");
+		res.next();
+		String idAlbum2 = res.getString(1);
+
+		System.out.println("Les albums : ");
+		req.getContenuTableWithCondition(stmt, "Album", "idClient=" + idClient);
+		LectureClavier.lireChaine();
+
+		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum1, im1, "1", "Martine ", "Les vacances");
+		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum1, im2, "2", "Martine ete", "Les vacances");
+		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum1, im3, "3", "Martine en hiver", "Les vacances");
+
+		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum2, im1, "1", "Martine ", "Les vacances");
+		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum2, im2, "2", "Martine ete", "Les vacances");
+		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum2, im3, "3", "Martine en hiver", "Les vacances");
+		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum2, im4, "4", "Martine repas", "Les plats desserts");
+		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum2, im5, "5", "Martine repas", "Les plats entrees");
+		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum2, im6, "6", "Martine repas", "Les plats chauds");
+
+		scen.passerCommande(stmt, idClient, idAlbum1, "2", "455");
+		res = stmt.executeQuery("select IdOrder.currval from dual ");
+		res.next();
+		String idOrder = res.getString(1);
+
+		scen.passerCommande(stmt, idClient, idOrder, idAlbum2, "2", "255");
+		scen.passerCommande(stmt, idClient, idOrder, idAlbum1, "3", "65");
+		scen.passerCommande(stmt, idClient, idOrder, idAlbum1, "2", "255");
+		scen.passerCommande(stmt, idClient, idOrder, idAlbum2, "3", "65");
+
+		scen.updatePrice(stmt, idClient, idOrder);
+		req.suiviCommande(stmt, idClient);
+		LectureClavier.lireChaine();
+
+		System.out.println("Vos codes promotionnels : ");
+		req.getContenuTableWithCondition(stmt, "CodePromo", "idClient=" + idClient);
+		LectureClavier.lireChaine();
+
 	}
-	
-	private static void albumClient() throws SQLException{
-		req.ListerAlbum(stmt, idClient);
+
+	public void Scenario2() {
+		scen.passerCommande(stmt, idClient, "2", "2", "455");
+		scen.passerCommande(stmt, idClient, "2", "2", "14");
+		scen.passerCommande(stmt, idClient, "2", "3", "45");
 	}
 
 	public static void main(String args[]) {
@@ -289,100 +378,5 @@ public class Client {
 			System.out.println(e.getErrorCode());
 
 		}
-	}
-	
-private static void scenar1() throws SQLException {
-		
-		scen.AddImage(stmt, idClient , "/Images/Martine.jpg", "0", 8, "Vancances martine");
-		ResultSet res = stmt.executeQuery("select IdImage.currval from dual ");
-		res.next();
-		String im1=res.getString(1);
-		
-		scen.AddImage(stmt, idClient , "/Images/ete.jpg", "0", 10, "Vancances été");
-		res = stmt.executeQuery("select IdImage.currval from dual ");
-		res.next();
-		String im2 = res.getString(1);
-		
-		scen.AddImage(stmt, idClient , "/Images/hiver.jpg", "1", 18, "Vancances hiver");
-		res = stmt.executeQuery("select IdImage.currval from dual ");
-		res.next();
-		String im3 = res.getString(1);
-		
-		scen.AddImage(stmt, idClient , "/Images/gateau.jpg", "1", 18, "Dessert");
-		res = stmt.executeQuery("select IdImage.currval from dual ");
-		res.next();
-		String im4 = res.getString(1);
-		
-		scen.AddImage(stmt, idClient , "/Images/entree.jpg", "1", 18, "entree");
-		res = stmt.executeQuery("select IdImage.currval from dual ");
-		res.next();
-		String im5 = res.getString(1);
-		
-		scen.AddImage(stmt, idClient , "/Images/chaud.jpg", "1", 18, "plat chaud");
-		res = stmt.executeQuery("select IdImage.currval from dual ");
-		res.next();
-		String im6 = res.getString(1);
-		
-		
-		System.out.println("Les images ont été ajoutées");
-		req.getContenuTableWithCondition(stmt, "IMAGE", "IdClient=" + idClient);
-		LectureClavier.lireChaine();
-		req.getContenuTableWithCondition(stmt, "Image", "idClient="+idClient);
-		LectureClavier.lireChaine();
-		
-		
-		scen.createAlbum(stmt, idClient, "Martine en vacances", "book", "154");
-		res = stmt.executeQuery("select IdAlbum.currval from dual ");
-		res.next();
-		String idAlbum1 = res.getString(1);
-		
-		scen.createAlbum(stmt, idClient, "Martine fait la cuisine", "book", "154");
-		res = stmt.executeQuery("select IdAlbum.currval from dual ");
-		res.next();
-		String idAlbum2 = res.getString(1);
-		
-		System.out.println("Les albums : ");
-		req.getContenuTableWithCondition(stmt, "Album", "idClient="+idClient);
-		LectureClavier.lireChaine();
-		
-		
-		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum1, im1, "1", "Martine ", "Les vacances");
-		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum1, im2, "2", "Martine ete", "Les vacances");
-		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum1, im3, "3", "Martine en hiver", "Les vacances");
-		
-		
-		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum2, im1, "1", "Martine ", "Les vacances");
-		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum2, im2, "2", "Martine ete", "Les vacances");
-		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum2, im3, "3", "Martine en hiver", "Les vacances");
-		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum2, im4, "4", "Martine repas", "Les plats desserts");
-		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum2, im5, "5", "Martine repas", "Les plats entrees");
-		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum2, im6, "6", "Martine repas", "Les plats chauds");
-		
-		
-		
-		scen.passerCommande(stmt, idClient, idAlbum1, "2", "455");
-		res = stmt.executeQuery("select IdOrder.currval from dual ");
-		res.next();
-		String idOrder = res.getString(1);
-		
-		scen.passerCommande(stmt, idClient, idOrder, idAlbum2, "2", "255");
-		scen.passerCommande(stmt, idClient, idOrder, idAlbum1, "3", "65");
-		scen.passerCommande(stmt, idClient, idOrder, idAlbum1, "2", "255");
-		scen.passerCommande(stmt, idClient, idOrder, idAlbum2, "3", "65");
-		
-		scen.updatePrice(stmt, idClient, idOrder);
-		req.suiviCommande(stmt, idClient);
-		LectureClavier.lireChaine();
-		
-		System.out.println("Vos codes promotionnels : ");
-		req.getContenuTableWithCondition(stmt, "CodePromo", "idClient="+idClient);
-		LectureClavier.lireChaine();
-		
-	}
-	
-	public void Scenario2() {
-		scen.passerCommande(stmt, idClient, "2", "2", "455");
-		scen.passerCommande(stmt, idClient, "2", "2", "14");
-		scen.passerCommande(stmt, idClient, "2", "3", "45");
 	}
 }

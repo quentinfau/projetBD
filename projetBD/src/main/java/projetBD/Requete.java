@@ -313,6 +313,15 @@ public class Requete {
 		}
 		return nbColumn;
 	}
+	
+	private String TranslateShare(String s){
+		String n="";
+		if(s.equals("1"))
+			n = "Oui";
+		else
+			n = "Non";
+		return n;
+	}
 
 	public void getContenuTable(Statement stmt, String nomTable, String idClient) {
 		try {
@@ -417,6 +426,66 @@ public class Requete {
 		}
 	}
 
+	/* Fonctions de Consultation*/
+	public void ListerAlbum(Statement stmt, String idClient){
+		try{
+			System.out.println("Voici vos Albums : ");
+			getContenuTable(stmt, "Album", idClient);
+			ResultSet res;
+			Statement stmt2 = stmt.getConnection().createStatement();			
+	       ResultSet rs = stmt.executeQuery("SELECT * from Album "
+	       		+ "WHERE IdClient = '"+idClient+"' ") ;	       
+	       while(rs.next()){
+	    	   System.out.println("- L'album " + rs.getString("nameAlbum")
+				+ " NbPages "+ rs.getString("NbPages"));
+	    	   res = stmt2.executeQuery("select * from Photo natural join Image where idAlbum="
+						+ rs.getString("idAlbum"));
+				while (res.next()) {
+					System.out.println(" _ Photo: " + res.getString("Title")
+					+ "  _Numero Page: " +res.getString("NumPage")
+					+"  Partage: " +TranslateShare(res.getString("shared")));
+				}
+				res.close();
+	       }
+	       rs.close();
+		
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void infoClient(Statement stmt1, String idClient){
+		try{
+			Statement stmt2 = stmt1.getConnection().createStatement();
+			System.out.println("Voici vos commandes : ");
+			getContenuTable(stmt1, "Client", idClient);
+			ResultSet resClient, res;
+			resClient = stmt1
+					.executeQuery("select * from Client where idClient="
+							+ idClient);
+			System.out.println("Informations du Client ");
+			while (resClient.next()) {		
+				System.out.println("FirstName : " + resClient.getString("FirstName"));
+                System.out.println("LastName : " + resClient.getString("LastName"));
+                System.out.println("Mail : " + resClient.getString("Mail"));
+                System.out.println("Address : " + resClient.getString("Address"));
+				res = stmt2.executeQuery("select * from CodePromo where idClient="
+						+ idClient);
+				System.out.println("Liste des Codes promo:");
+	            while (res.next()){
+	                System.out.println("numero Code: " + res.getString("IdPromo") +" ||  "+"Amount: " + res.getString("Amount"));
+	                System.out.println();       
+	            } 			
+				System.out.println();
+				res.close();
+				stmt2.close();
+		}	
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}	
+	}
+	
+	
 	public boolean cleanImageAfterLogoff(Statement stmt) {
 		ResultSet res;
 		try {

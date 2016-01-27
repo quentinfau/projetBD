@@ -58,6 +58,8 @@ public class Client {
 		System.out.println("10 : Supprimer album");
 		System.out.println("11 : Supprimer une photo");
 		System.out.println("12 : Drop table");
+		System.out.println("13 : Informations d'un client");
+		System.out.println("14 : Les Albums d'un Client");
 	}
 
 	private static void menuConnexion() {
@@ -178,6 +180,14 @@ public class Client {
 	private static void setIsolation() throws SQLException {
 		conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 	}
+	
+	private static void infoClient() throws SQLException{
+		req.infoClient(stmt, idClient);
+	}
+	
+	private static void albumClient() throws SQLException{
+		req.ListerAlbum(stmt, idClient);
+	}
 
 	public static void main(String args[]) {
 
@@ -249,10 +259,10 @@ public class Client {
 					dropTable();
 					break;
 				case 13:
-					ResultSet res = stmt.executeQuery(
-							"Select Album.IdAlbum FROM Album LEFT join Calendar on Album.IdAlbum=Calendar.IdAlbum LEFT join Agenda on Agenda.IdAlbum=Album.IdAlbum LEFT join Book on Book.IdAlbum=Album.IdAlbum Where Calendar.IdAlbum is NULL AND Book.IdAlbum is NULL AND Agenda.IdAlbum is NULL");
-					res.next();
-					System.out.println(res.getString(1));
+					infoClient();
+					break;
+				case 14:
+					albumClient();
 					break;
 				default:
 					System.out.println("=> choix incorrect");

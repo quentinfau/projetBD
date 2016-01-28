@@ -2,6 +2,7 @@ package projetBD;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -15,6 +16,7 @@ public class Application {
 	static final ReqScenario reqSc = new ReqScenario();
 	static Connection conn;
 	static Statement stmt;
+	static final ReqScenario scen = new ReqScenario();
 
 	private static void connexion() {
 
@@ -56,7 +58,8 @@ public class Application {
 		System.out.println("10 : Drop table");
 		System.out.println("11 : Mettre à jour les status de commande et de livraison");
 		System.out.println("12 : Modifier l'isolation");
-		System.out.println("13 : scenaIsolation 1");
+		System.out.println("13 : Transaction format prix");
+		System.out.println("14 : scenaIsolation 1");
 	}
 
 	private static void commit() throws SQLException {
@@ -114,6 +117,26 @@ private static void setIsolation() throws SQLException {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+	public static void scenarioFormat() throws SQLException {
+		System.out.println("Avec isolation ? (y or n)");
+		String choix = LectureClavier.lireChaine();
+		if (choix.equalsIgnoreCase("y")) {
+			setIsolation();
+
+		}
+
+		ResultSet res = stmt
+				.executeQuery("select IdFormat, price from Formats Where label='A4' ");
+		res.next();
+		String idFormat = res.getString(1);
+		Double price = Double.parseDouble(res.getString(2));
+
+		System.out.println("Prix du format A4: " + price);
+
+		LectureClavier.lireChaine();
+		scen.UpdateFormatPrice(stmt, idFormat, price + 2);
+
 	}
 
 	public static void main(String args[]) {
@@ -201,6 +224,9 @@ private static void setIsolation() throws SQLException {
 					setIsolation();
 					break;
 				case 13:
+					scenarioFormat();
+					break;
+				case 14:
 					Isolation1();
 					break;
 				default:

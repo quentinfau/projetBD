@@ -537,4 +537,14 @@ public class ReqScenario {
 		}
 
 	}
+	public void UpdateFormatPrice(Statement stmt, String idFormat, double price) {
+		try {
+			stmt.executeUpdate("Update Formats set price="+price+" WHERE idformat="+idFormat);
+			System.out.println("Modification confirmée");
+		} catch (SQLException e) {
+			System.out.println("Erreur de modification");
+			e.printStackTrace();
+		}
+		
+	}
 }

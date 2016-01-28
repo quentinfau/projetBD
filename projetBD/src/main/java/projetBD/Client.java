@@ -65,10 +65,11 @@ public class Client {
 		System.out.println("16 : Scenario Delete Image");
 		System.out.println("17 : Scénario Résolution Format");
 		System.out.println("20 : Scénario Supression image partagé");
+		System.out.println("31 : Modifier résolution image");
+		System.out.println("40 : Scénario isolation Format prix");
 		System.out.println("50 : Mettre à jour statut commandes");
-		System.out.println("31 : Transaction Format prix");
 		System.out.println("99 : roolback");
-		System.out.println("100 : Afficher table");
+		System.out.println("100 : Afficher une table");
 	}
 
 	private static void menuConnexion() {
@@ -193,7 +194,10 @@ public class Client {
 			rollback();
 		}
 	}
-
+	private static void ModifierResoImage() throws SQLException {
+		req.UpdateResoImage(stmt, idClient);
+		
+	}
 private static void setIsolation() throws SQLException {
 		
 		int action2;
@@ -340,6 +344,28 @@ private static void setIsolation() throws SQLException {
 		commit();
 
 	}
+	public static void scenarFormatPrice() throws SQLException {
+		System.out.println("Avec isolation ? (y or n)");
+		String choix = LectureClavier.lireChaine();
+
+		if (choix.equalsIgnoreCase("y")) {
+			setIsolation();
+		}
+		ResultSet res = stmt.executeQuery("select price from Formats Where label='A4' ");
+		res.next();
+		
+		Double price = Double.parseDouble(res.getString(1));
+		
+		res = stmt.executeQuery("select IdOrder from Orders Where IdOrder=2 ");
+		res.next();
+		String IdOrder = res.getString(1);
+		
+		res = stmt.executeQuery("select Quantity from Article Where IdOrder= "+IdOrder);
+		res.next();
+		Double quantity = Double.parseDouble(res.getString(1));
+		System.out.println("Le prix du format : "+price + "   Le prix de l'article : "+price*quantity);
+		
+	}
 
 	private static void scenarResolution() throws SQLException {
 		ResultSet res = stmt.executeQuery("select idAlbum from Album where nameAlbum='Martine au sport'");
@@ -457,7 +483,10 @@ private static void setIsolation() throws SQLException {
 					scenarSupressionImagePartage();
 					break;
 				case 31:
-					// scenarFormatPrice();
+					ModifierResoImage();
+					break;
+				case 40:
+					scenarFormatPrice();
 					break;
 				case 50:
 					req.mettreAJourStatusCommande(stmt);

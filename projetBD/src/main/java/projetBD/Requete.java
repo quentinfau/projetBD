@@ -235,8 +235,10 @@ public class Requete {
 		String info = LectureClavier.lireChaine();
 		System.out.println("Voulez-vous partager l'image ? oui --> 1   /  non --> 0 ");
 		String share = LectureClavier.lireChaine();
+		System.out.println("Ajoutez la résolution de votre image : ");
+		String resolution = LectureClavier.lireChaine();
 		String sql = "insert into Image(IdImage, IdClient, PathImage, Shared, ResolutionImage, Info) "
-				+ "values(IdImage.NEXTVAL,'" + IdClient + "','" + path + "'," + share + ",15,'" + info + "')";
+				+ "values(IdImage.NEXTVAL,'" + IdClient + "','" + path + "'," + share + ","+resolution+",'" + info + "')";
 		try {
 			stmt.executeUpdate(sql);
 			System.out.println("image ajouté");
@@ -966,5 +968,22 @@ public class Requete {
 			return false;
 		}
 
+	}
+	public void UpdateResoImage(Statement stmt, String idClient) {
+		System.out.println("Quelle image voulez-vous modifier : ");
+		getContenuTableWithCondition(stmt, "Image", "IdClient="+idClient);
+		String idImage=LectureClavier.lireChaine();
+		System.out.println("Entrez la nouvelle résolution : ");
+		String newResolution = LectureClavier.lireChaine();
+		
+		try {
+			stmt.executeQuery("Update Image set ResolutionImage="+newResolution+" Where idImage= "+idImage);
+			System.out.println("Résolution modifée");
+		} catch (SQLException e) {
+			System.out.println("Erreur de modification");
+			e.printStackTrace();
+		}
+		
+		
 	}
 }

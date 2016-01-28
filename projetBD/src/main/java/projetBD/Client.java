@@ -61,6 +61,7 @@ public class Client {
 		System.out.println("12 : Drop table");
 		System.out.println("13 : Informations d'un client");
 		System.out.println("14 : Les Albums d'un Client");
+		System.out.println("15 : Scenario 1");
 	}
 
 	private static void menuConnexion() {
@@ -192,7 +193,7 @@ public class Client {
 
 	private static void scenar1() throws SQLException {
 
-		scen.AddImage(stmt, idClient, "/Images/Martine.jpg", "0", 8, "Vancances martine");
+		scen.AddImage(stmt, idClient, "/Images/Martine.jpg", "0", 10, "Vancances martine");
 		ResultSet res = stmt.executeQuery("select IdImage.currval from dual ");
 		res.next();
 		String im1 = res.getString(1);
@@ -228,12 +229,12 @@ public class Client {
 		req.getContenuTableWithCondition(stmt, "Image", "idClient=" + idClient);
 		LectureClavier.lireChaine();
 
-		scen.createAlbum(stmt, idClient, "Martine en vacances", "book", "154");
+		scen.createAlbum(stmt, idClient, "Martine en vacances", "book", "0");
 		res = stmt.executeQuery("select IdAlbum.currval from dual ");
 		res.next();
 		String idAlbum1 = res.getString(1);
 
-		scen.createAlbum(stmt, idClient, "Martine fait la cuisine", "book", "154");
+		scen.createAlbum(stmt, idClient, "Martine fait la cuisine", "book", "0");
 		res = stmt.executeQuery("select IdAlbum.currval from dual ");
 		res.next();
 		String idAlbum2 = res.getString(1);
@@ -253,14 +254,13 @@ public class Client {
 		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum2, im5, "5", "Martine repas", "Les plats entrees");
 		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum2, im6, "6", "Martine repas", "Les plats chauds");
 
-		scen.passerCommande(stmt, idClient, idAlbum1, "2", "455");
+		scen.passerCommande(stmt, idClient, "", idAlbum1, "2", "14");
 		res = stmt.executeQuery("select IdOrder.currval from dual ");
 		res.next();
 		String idOrder = res.getString(1);
-
-		scen.passerCommande(stmt, idClient, idOrder, idAlbum2, "2", "255");
+		scen.passerCommande(stmt, idClient, idOrder, idAlbum2, "2", "12");
 		scen.passerCommande(stmt, idClient, idOrder, idAlbum1, "3", "65");
-		scen.passerCommande(stmt, idClient, idOrder, idAlbum1, "2", "255");
+		scen.passerCommande(stmt, idClient, idOrder, idAlbum1, "2", "41");
 		scen.passerCommande(stmt, idClient, idOrder, idAlbum2, "3", "65");
 
 		scen.updatePrice(stmt, idClient, idOrder);
@@ -271,12 +271,6 @@ public class Client {
 		req.getContenuTableWithCondition(stmt, "CodePromo", "idClient=" + idClient);
 		LectureClavier.lireChaine();
 
-	}
-
-	public void Scenario2() {
-		scen.passerCommande(stmt, idClient, "2", "2", "455");
-		scen.passerCommande(stmt, idClient, "2", "2", "14");
-		scen.passerCommande(stmt, idClient, "2", "3", "45");
 	}
 
 	public static void main(String args[]) {
@@ -356,6 +350,9 @@ public class Client {
 					break;
 				case 15:
 					scenar1();
+					break;
+				case 16:
+					rollback();
 					break;
 				default:
 					System.out.println("=> choix incorrect");

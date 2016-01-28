@@ -721,8 +721,6 @@ public class Requete {
 	public void infoClient(Statement stmt1, String idClient) {
 		try {
 			Statement stmt2 = stmt1.getConnection().createStatement();
-			System.out.println("Voici vos commandes : ");
-			getContenuTable(stmt1, "Client", idClient);
 			ResultSet resClient, res;
 			resClient = stmt1.executeQuery("select * from Client where idClient=" + idClient);
 			System.out.println("Informations du Client ");

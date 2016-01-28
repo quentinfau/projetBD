@@ -4,6 +4,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class ReqScenario {
@@ -54,6 +56,16 @@ public class ReqScenario {
 			e.printStackTrace();
 		}
 		return retour;
+	}
+
+	public boolean incrementerNbPages(Statement stmt, String idAlbum) {
+		try {
+			stmt.executeUpdate("update Album set nbPages = nbPages + 1 where idAlbum=" + idAlbum);
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	public boolean createAlbum(Statement stmt, String IdClient, String nameAlbum, String choice, String nbPage) {
@@ -137,7 +149,7 @@ public class ReqScenario {
 
 		try {
 			stmt.executeUpdate(sql);
-			return true;
+			return incrementerNbPages(stmt, idAlbum);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			return false;
@@ -166,7 +178,6 @@ public class ReqScenario {
 		Statement stmt2;
 		String quantity, price = "0", nbPages = "0", IdPromo = "";
 		Double totalPrice = 0.0;
-		boolean codePromo;
 		try {
 			stmt2 = stmt.getConnection().createStatement();
 			resArticle = stmt.executeQuery("select * from Article where idOrder=" + idOrder);
@@ -187,8 +198,9 @@ public class ReqScenario {
 			}
 			System.out.println("Le prix total de votre commande s'eleve à " + totalPrice);
 
-			codePromo = stmt.execute("Select * From CodePromo WHERE idClient=" + idClient);
-			if (codePromo) {
+			res = stmt.executeQuery("Select idPromo From CodePromo WHERE idClient=" + idClient);
+			
+			if (res.next()) {
 				System.out.println("Voulez vous utiliser un code promo ? (y or n)");
 				String ChoixPromo = LectureClavier.lireChaine();
 				if (ChoixPromo.equalsIgnoreCase("y")) {
@@ -213,7 +225,7 @@ public class ReqScenario {
 						"update Orders set totalPrice=" + totalPrice.shortValue() + " where idOrder=" + idOrder);
 				stmt.executeUpdate(
 						"update Orders set totalPrice=" + totalPrice.shortValue() + " where idOrder=" + idOrder);
-				if (!IdPromo.isEmpty()) {
+				if (!IdPromo.equals("")) {
 					stmt.executeUpdate("Delete from CodePromo Where IDPromo=" + IdPromo);
 				}
 
@@ -228,53 +240,137 @@ public class ReqScenario {
 		}
 	}
 
-	public void passerCommande(Statement stmt, String idClient, String idAlbum, String idFormat, String quantity) {
-		ResultSet res;
-		try {
-			stmt.executeUpdate("insert into Orders values (IdOrder.NEXTVAL, TO_DATE('" + getDate()
-					+ "', 'DD/MM/YY HH24:MI') , 0, " + idClient + ", 'en cours')");
-			res = stmt.executeQuery("select IdOrder.currval from dual");
-			res.next();
-			String idOrder = res.getString(1);
-
-			if (!idAlbum.equals("") || !idFormat.equals("") || !quantity.equals("")) {
-
-				stmt.executeUpdate("insert into Supply values (IdSupply.NEXTVAL, TO_DATE('" + getDate()
-						+ "', 'DD/MM/YY HH24:MI') , 'en cours')");
-				res = stmt.executeQuery("select IdSupply.currval from dual");
-				res.next();
-				String idSupply = res.getString(1);
-				stmt.executeUpdate("insert into Article values (IdArticle.NEXTVAL, " + idOrder + "," + idAlbum + ","
-						+ idSupply + ", " + idFormat + ", " + quantity + ")");
-
-			}
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-
-		}
+	public String getDate(int jour) {
+		Date aujourdhui = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		Calendar c = Calendar.getInstance();
+		c.setTime(aujourdhui);
+		c.add(Calendar.DATE, jour); // number of days to add
+		return sdf.format(c.getTime());
 	}
 
 	public void passerCommande(Statement stmt, String idClient, String idOrder, String idAlbum, String idFormat,
 			String quantity) {
 		ResultSet res;
 		try {
-
-			if (!idAlbum.equals("") || !idFormat.equals("") || !quantity.equals("")) {
-
-				stmt.executeUpdate("insert into Supply values (IdSupply.NEXTVAL, TO_DATE('" + getDate()
-						+ "', 'DD/MM/YY HH24:MI') , 'en cours')");
-				res = stmt.executeQuery("select IdSupply.currval from dual");
+			if (idOrder.equals("")) {
+				stmt.executeUpdate("insert into Orders values (IdOrder.NEXTVAL, TO_DATE('" + getDate(0)
+						+ "', 'DD/MM/YYYY') , 0, " + idClient + ", 'en cours')");
+				res = stmt.executeQuery("select IdOrder.currval from dual");
 				res.next();
-				String idSupply = res.getString(1);
-				stmt.executeUpdate("insert into Article values (IdArticle.NEXTVAL, " + idOrder + "," + idAlbum + ","
-						+ idSupply + ", " + idFormat + ", " + quantity + ")");
-
+				idOrder = res.getString(1);
 			}
 
+			String idSupply;
+			res = stmt.executeQuery("select nbPages from Album where idAlbum=" + idAlbum);
+			res.next();
+			int nbPages = res.getInt("nbPages");
+			int jour = calculerProductionJournaliere(stmt, 0, idFormat, Integer.parseInt(quantity), nbPages);
+			if (jour == -1) {
+				System.err.println("ne peut pas etre traité car la vitesse n'est pas assez élevé");
+			}
+			System.out.println(getDate(jour));
+			res = stmt.executeQuery(
+					"select idPrestataire from prestataire where preference = (select Max(preference) from Prestataire)");
+			res.next();
+			String idPrestataire = res.getString("idPrestataire");
+			res = stmt.executeQuery(
+					"select limitTime from Contact where idPrestataire=" + idPrestataire + " AND idFormat=" + idFormat);
+			res.next();
+			int limitTime = res.getInt("limitTime");
+			if (limitTime < jour) {
+				stmt.executeUpdate(
+						"insert into Supply (IdSupply, IdPrestataire, DateSup, StatusSup) values (IdSupply.NEXTVAL,'"
+								+ idPrestataire + "', TO_DATE('" + getDate(0) + "+ " + limitTime
+								+ "', 'DD/MM/YYYY') , 'en cours')");
+				res = stmt.executeQuery("select IdSupply.currval from dual");
+				res.next();
+				idSupply = res.getString(1);
+			} else {
+				System.out.println("jour : " + jour + "date : " + getDate(jour));
+				stmt.executeUpdate(
+						"insert into Supply (IdSupply, DateSup, StatusSup) values (IdSupply.NEXTVAL, TO_DATE('"
+								+ getDate(jour) + "', 'DD/MM/YYYY') , 'en cours')");
+				res = stmt.executeQuery("select IdSupply.currval from dual");
+				res.next();
+				idSupply = res.getString(1);
+				System.out.println("avant verif stock");
+				verifierStock(stmt, Integer.parseInt(quantity), idFormat, idAlbum, idSupply, idPrestataire, limitTime);
+			}
+			System.out.println("avant insert article");
+			stmt.executeUpdate("insert into Article values (IdArticle.NEXTVAL, " + idOrder + "," + idAlbum + ","
+					+ idSupply + ", " + idFormat + ", " + quantity + ")");
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}
+	}
 
+	private void verifierStock(Statement stmt, int quantity, String idFormat, String idAlbum, String idSupply,
+			String idPrestataire, int limitTime) {
+		ResultSet res;
+		try {
+			System.out.println("dans verif stocl");
+			res = stmt.executeQuery("select nbPages from Album where idAlbum=" + idAlbum);
+			res.next();
+			int nbPages = res.getInt("nbPages");
+			res = stmt.executeQuery("select stock from Formats where idFormat=" + idFormat);
+			res.next();
+			int stock = res.getInt("stock");
+			int total = quantity * nbPages;
+			if (stock < total) {
+				stmt.executeUpdate("update Supply set idPrestataire =" + idPrestataire + " where idSupply=" + idSupply);
+				stmt.executeUpdate("update Supply set DateSup = (TO_DATE('" + getDate(0) + "', 'DD/MM/YY HH24:MI') + "
+						+ limitTime + ") where idSupply=" + idSupply);
+			} else {	
+					stmt.executeUpdate(
+						"update Formats set Stock = (Stock - " + total + ") where Formats.IdFormat=" + idFormat);
+				stmt.executeUpdate("update Supply set StatusSup= 'envoye' where idSupply=" + idSupply);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public int calculerProductionJournaliere(Statement stmt, int jour, String idFormat, int quantiteArticle,
+			int nbPagesArticle) {
+		try {
+			System.out.println("JOUR : " + jour);
+			ResultSet res, resArticle;
+			Integer productionJour = quantiteArticle * nbPagesArticle, vitesse;
+			Statement stmt2 = stmt.getConnection().createStatement();
+			res = stmt.executeQuery("select speed from Formats where idFormat=" + idFormat);
+			res.next();
+			vitesse = res.getInt("speed");
+			if (productionJour > vitesse) {
+				return -1;
+			}
+			resArticle = stmt.executeQuery("select idArticle from Article where idFormat=" + idFormat
+					+ " AND idSupply IN (select idSupply from Supply where idPrestataire is null AND dateSup=TO_DATE('"
+					+ getDate(jour) + "', 'DD/MM/YYYY'))");
+			while (resArticle.next()) {
+				String idArticle = resArticle.getString("idArticle");
+				res = stmt2.executeQuery("select quantity from Article where idArticle=" + idArticle);
+				res.next();
+				int quantity = res.getInt("quantity");
+				res = stmt2.executeQuery(
+						"select nbPages from Album where idAlbum = (select idAlbum from Article where idArticle="
+								+ idArticle + ")");
+				res.next();
+				int nbPages = res.getInt("nbPages");
+				System.out.println("quantite : " + quantity);
+				System.out.println("nbPage : " + nbPages);
+				productionJour = productionJour + (quantity * nbPages);
+
+			}
+			System.out.println("prod jour : " + productionJour);
+			if (productionJour < vitesse) {
+				return jour;
+			} else {
+				return calculerProductionJournaliere(stmt, jour + 1, idFormat, quantiteArticle, nbPagesArticle);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return -1;
 		}
 	}
 

@@ -199,7 +199,7 @@ public class ReqScenario {
 			System.out.println("Le prix total de votre commande s'eleve à " + totalPrice);
 
 			res = stmt.executeQuery("Select idPromo From CodePromo WHERE idClient=" + idClient);
-			
+
 			if (res.next()) {
 				System.out.println("Voulez vous utiliser un code promo ? (y or n)");
 				String ChoixPromo = LectureClavier.lireChaine();
@@ -260,7 +260,6 @@ public class ReqScenario {
 				res.next();
 				idOrder = res.getString(1);
 			}
-
 			String idSupply;
 			res = stmt.executeQuery("select nbPages from Album where idAlbum=" + idAlbum);
 			res.next();
@@ -268,38 +267,40 @@ public class ReqScenario {
 			int jour = calculerProductionJournaliere(stmt, 0, idFormat, Integer.parseInt(quantity), nbPages);
 			if (jour == -1) {
 				System.err.println("ne peut pas etre traité car la vitesse n'est pas assez élevé");
-			}
-			System.out.println(getDate(jour));
-			res = stmt.executeQuery(
-					"select idPrestataire from prestataire where preference = (select Max(preference) from Prestataire)");
-			res.next();
-			String idPrestataire = res.getString("idPrestataire");
-			res = stmt.executeQuery(
-					"select limitTime from Contact where idPrestataire=" + idPrestataire + " AND idFormat=" + idFormat);
-			res.next();
-			int limitTime = res.getInt("limitTime");
-			if (limitTime < jour) {
-				stmt.executeUpdate(
-						"insert into Supply (IdSupply, IdPrestataire, DateSup, StatusSup) values (IdSupply.NEXTVAL,'"
-								+ idPrestataire + "', TO_DATE('" + getDate(0) + "+ " + limitTime
-								+ "', 'DD/MM/YYYY') , 'en cours')");
-				res = stmt.executeQuery("select IdSupply.currval from dual");
-				res.next();
-				idSupply = res.getString(1);
 			} else {
-				System.out.println("jour : " + jour + "date : " + getDate(jour));
-				stmt.executeUpdate(
-						"insert into Supply (IdSupply, DateSup, StatusSup) values (IdSupply.NEXTVAL, TO_DATE('"
-								+ getDate(jour) + "', 'DD/MM/YYYY') , 'en cours')");
-				res = stmt.executeQuery("select IdSupply.currval from dual");
+				System.out.println(getDate(jour));
+				res = stmt.executeQuery(
+						"select idPrestataire from prestataire where preference = (select Max(preference) from Prestataire)");
 				res.next();
-				idSupply = res.getString(1);
-				System.out.println("avant verif stock");
-				verifierStock(stmt, Integer.parseInt(quantity), idFormat, idAlbum, idSupply, idPrestataire, limitTime);
+				String idPrestataire = res.getString("idPrestataire");
+				res = stmt.executeQuery("select limitTime from Contact where idPrestataire=" + idPrestataire
+						+ " AND idFormat=" + idFormat);
+				res.next();
+				int limitTime = res.getInt("limitTime");
+				if (limitTime < jour) {
+					stmt.executeUpdate(
+							"insert into Supply (IdSupply, IdPrestataire, DateSup, StatusSup) values (IdSupply.NEXTVAL,'"
+									+ idPrestataire + "', TO_DATE('" + getDate(0) + "+ " + limitTime
+									+ "', 'DD/MM/YYYY') , 'en cours')");
+					res = stmt.executeQuery("select IdSupply.currval from dual");
+					res.next();
+					idSupply = res.getString(1);
+				} else {
+					System.out.println("jour : " + jour + "date : " + getDate(jour));
+					stmt.executeUpdate(
+							"insert into Supply (IdSupply, DateSup, StatusSup) values (IdSupply.NEXTVAL, TO_DATE('"
+									+ getDate(jour) + "', 'DD/MM/YYYY') , 'en cours')");
+					res = stmt.executeQuery("select IdSupply.currval from dual");
+					res.next();
+					idSupply = res.getString(1);
+					System.out.println("avant verif stock");
+					verifierStock(stmt, Integer.parseInt(quantity), idFormat, idAlbum, idSupply, idPrestataire,
+							limitTime);
+				}
+				System.out.println("avant insert article");
+				stmt.executeUpdate("insert into Article values (IdArticle.NEXTVAL, " + idOrder + "," + idAlbum + ","
+						+ idSupply + ", " + idFormat + ", " + quantity + ")");
 			}
-			System.out.println("avant insert article");
-			stmt.executeUpdate("insert into Article values (IdArticle.NEXTVAL, " + idOrder + "," + idAlbum + ","
-					+ idSupply + ", " + idFormat + ", " + quantity + ")");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -321,8 +322,8 @@ public class ReqScenario {
 				stmt.executeUpdate("update Supply set idPrestataire =" + idPrestataire + " where idSupply=" + idSupply);
 				stmt.executeUpdate("update Supply set DateSup = (TO_DATE('" + getDate(0) + "', 'DD/MM/YY HH24:MI') + "
 						+ limitTime + ") where idSupply=" + idSupply);
-			} else {	
-					stmt.executeUpdate(
+			} else {
+				stmt.executeUpdate(
 						"update Formats set Stock = (Stock - " + total + ") where Formats.IdFormat=" + idFormat);
 				stmt.executeUpdate("update Supply set StatusSup= 'envoye' where idSupply=" + idSupply);
 			}

@@ -16,10 +16,8 @@ import java.util.List;
 public class Requete {
 	static final String RESOURCES = "src/main/resources/";
 
-	public boolean createTrigger(Statement stmt) {
+	public boolean createTrigger(Statement stmt, String name) {
 
-		System.out.println("nom du fichier trigger.sql ?");
-		String name = LectureClavier.lireChaine();
 		String file = RESOURCES + name;
 
 		String s = new String();
@@ -222,7 +220,7 @@ public class Requete {
 		System.out.println("Voulez-vous partager l'image ? oui --> 1   /  non --> 0 ");
 		String share = LectureClavier.lireChaine();
 		String sql = "insert into Image(IdImage, IdClient, PathImage, Shared, ResolutionImage, Info) "
-				+ "values(IdImage.NEXTVAL,'" + IdClient + "','" + path + "'," + share + ",8,'" + info + "')";
+				+ "values(IdImage.NEXTVAL,'" + IdClient + "','" + path + "'," + share + ",15,'" + info + "')";
 		try {
 			stmt.executeUpdate(sql);
 			System.out.println("image ajouté");
@@ -236,6 +234,16 @@ public class Requete {
 	public boolean incrementerNbPages(Statement stmt, String idAlbum) {
 		try {
 			stmt.executeUpdate("update Album set nbPages = nbPages + 1 where idAlbum=" + idAlbum);
+			return true;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	public boolean decrementerNbPages(Statement stmt, String idAlbum) {
+		try {
+			stmt.executeUpdate("update Album set nbPages = nbPages - 1 where idAlbum=" + idAlbum);
 			return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -526,39 +534,40 @@ public class Requete {
 					int jour = calculerProductionJournaliere(stmt, 0, idFormat, Integer.parseInt(quantity), nbPages);
 					if (jour == -1) {
 						System.err.println("ne peut pas etre traité car la vitesse n'est pas assez élevé");
-					}
-					System.out.println(getDate(jour));
-					res = stmt.executeQuery(
-							"select idPrestataire from prestataire where preference = (select Max(preference) from Prestataire)");
-					res.next();
-					String idPrestataire = res.getString("idPrestataire");
-					res = stmt.executeQuery("select limitTime from Contact where idPrestataire=" + idPrestataire
-							+ " AND idFormat=" + idFormat);
-					res.next();
-					int limitTime = res.getInt("limitTime");
-					if (limitTime < jour) {
-						stmt.executeUpdate(
-								"insert into Supply (IdSupply, IdPrestataire, DateSup, StatusSup) values (IdSupply.NEXTVAL,'"
-										+ idPrestataire + "', TO_DATE('" + getDate(0) + "+ " + limitTime
-										+ "', 'DD/MM/YYYY') , 'en cours')");
-						res = stmt.executeQuery("select IdSupply.currval from dual");
-						res.next();
-						idSupply = res.getString(1);
 					} else {
-						System.out.println("jour : " + jour + "date : " + getDate(jour));
-						stmt.executeUpdate(
-								"insert into Supply (IdSupply, DateSup, StatusSup) values (IdSupply.NEXTVAL, TO_DATE('"
-										+ getDate(jour) + "', 'DD/MM/YYYY') , 'en cours')");
-						res = stmt.executeQuery("select IdSupply.currval from dual");
+						System.out.println(getDate(jour));
+						res = stmt.executeQuery(
+								"select idPrestataire from prestataire where preference = (select Max(preference) from Prestataire)");
 						res.next();
-						idSupply = res.getString(1);
-						verifierStock(stmt, Integer.parseInt(quantity), idFormat, idAlbum, idSupply, idPrestataire,
-								limitTime);
+						String idPrestataire = res.getString("idPrestataire");
+						res = stmt.executeQuery("select limitTime from Contact where idPrestataire=" + idPrestataire
+								+ " AND idFormat=" + idFormat);
+						res.next();
+						int limitTime = res.getInt("limitTime");
+						if (limitTime < jour) {
+							stmt.executeUpdate(
+									"insert into Supply (IdSupply, IdPrestataire, DateSup, StatusSup) values (IdSupply.NEXTVAL,'"
+											+ idPrestataire + "', TO_DATE('" + getDate(0) + "+ " + limitTime
+											+ "', 'DD/MM/YYYY') , 'en cours')");
+							res = stmt.executeQuery("select IdSupply.currval from dual");
+							res.next();
+							idSupply = res.getString(1);
+						} else {
+							System.out.println("jour : " + jour + "date : " + getDate(jour));
+							stmt.executeUpdate(
+									"insert into Supply (IdSupply, DateSup, StatusSup) values (IdSupply.NEXTVAL, TO_DATE('"
+											+ getDate(jour) + "', 'DD/MM/YYYY') , 'en cours')");
+							res = stmt.executeQuery("select IdSupply.currval from dual");
+							res.next();
+							idSupply = res.getString(1);
+							verifierStock(stmt, Integer.parseInt(quantity), idFormat, idAlbum, idSupply, idPrestataire,
+									limitTime, jour);
+						}
+
+						stmt.executeUpdate("insert into Article values (IdArticle.NEXTVAL, " + idOrder + "," + idAlbum
+								+ "," + idSupply + ", " + idFormat + ", " + quantity + ")");
+
 					}
-
-					stmt.executeUpdate("insert into Article values (IdArticle.NEXTVAL, " + idOrder + "," + idAlbum + ","
-							+ idSupply + ", " + idFormat + ", " + quantity + ")");
-
 				} else {
 					return false;
 				}
@@ -574,7 +583,7 @@ public class Requete {
 	}
 
 	private void verifierStock(Statement stmt, int quantity, String idFormat, String idAlbum, String idSupply,
-			String idPrestataire, int limitTime) {
+			String idPrestataire, int limitTime, int jour) {
 		ResultSet res;
 		try {
 			res = stmt.executeQuery("select nbPages from Album where idAlbum=" + idAlbum);
@@ -589,9 +598,11 @@ public class Requete {
 				stmt.executeUpdate("update Supply set DateSup = (TO_DATE('" + getDate(0) + "', 'DD/MM/YY HH24:MI') + "
 						+ limitTime + ") where idSupply=" + idSupply);
 			} else {
-				stmt.executeUpdate(
-						"update Formats set Stock = (Stock - " + total + ") where Formats.IdFormat=" + idFormat);
-				stmt.executeUpdate("update Supply set StatusSup= 'envoye' where idSupply=" + idSupply);
+				if (jour == 0) {
+					stmt.executeUpdate(
+							"update Formats set Stock = (Stock - " + total + ") where Formats.IdFormat=" + idFormat);
+					stmt.executeUpdate("update Supply set StatusSup= 'envoye' where idSupply=" + idSupply);
+				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -830,7 +841,7 @@ public class Requete {
 		getContenuTableWithCondition(stmt, "Photo", "IdAlbum=" + IdAlbum);
 		System.out.println("Entrez le numéro de page de la photo que vous voulez supprimer de l'album ");
 		String NumPage = LectureClavier.lireChaine();
-		// DECREMENTATION NB PAGES
+		decrementerNbPages(stmt, IdAlbum);
 		return deleteElementTable(stmt, "Photo", "NumPage=" + NumPage);
 
 	}

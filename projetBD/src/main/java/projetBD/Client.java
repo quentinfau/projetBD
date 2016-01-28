@@ -270,7 +270,7 @@ public class Client {
 		System.out.println("Vos codes promotionnels : ");
 		req.getContenuTableWithCondition(stmt, "CodePromo", "idClient=" + idClient);
 		LectureClavier.lireChaine();
-
+		commit();
 	}
 
 	public static void main(String args[]) {

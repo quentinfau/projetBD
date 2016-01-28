@@ -143,7 +143,8 @@ public class Application {
 					req.getContenuTable(stmt, nomTable);
 					break;
 				case 4:
-					if (req.createTrigger(stmt)) {
+					if (req.createTrigger(stmt, "trg_codepromo.sql") && req.createTrigger(stmt, "trg_resolution.sql")
+							&& req.createTrigger(stmt, "trg_deleteimage.sql")) {
 						commit();
 					} else {
 						rollback();

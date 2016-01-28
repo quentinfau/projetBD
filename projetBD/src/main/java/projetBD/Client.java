@@ -195,12 +195,14 @@ public class Client {
 			rollback();
 		}
 	}
+
 	private static void ModifierResoImage() throws SQLException {
 		req.UpdateResoImage(stmt, idClient);
-		
+
 	}
-private static void setIsolation() throws SQLException {
-		
+
+	private static void setIsolation() throws SQLException {
+
 		int action2;
 		System.out.println("0 -> TRANSACTION_READ_COMMITTED");
 		System.out.println("1 -> TRANSACTION_SERIALIZABLE");
@@ -215,11 +217,6 @@ private static void setIsolation() throws SQLException {
 		default:
 			System.out.println("=> choix incorrect");
 		}
-	}
-	
-	private static void Isolation1(){
-		String cond = "label= 'A5'";
-		req.getContenuTableWithCondition(stmt, "Formats", cond);	
 	}
 
 	private static void scenarCommande() throws SQLException {
@@ -294,9 +291,9 @@ private static void setIsolation() throws SQLException {
 
 		scen.updatePrice(stmt, idClient, idOrder);
 		req.mettreAJourStatusCommande(stmt);
-		
+
 		commit();
-		
+
 		req.suiviCommande(stmt, idClient);
 		LectureClavier.lireChaine();
 
@@ -324,9 +321,6 @@ private static void setIsolation() throws SQLException {
 		String im3 = res.getString(1);
 
 		scen.AddImage(stmt, idClient, "/Images/nonUtilise.jpg", "1", 2, "Non utilisée");
-		res = stmt.executeQuery("select IdImage.currval from dual ");
-		res.next();
-		String imNonUtilise = res.getString(1);
 
 		System.out.println("Les images ont été ajoutées");
 		req.getContenuTableWithCondition(stmt, "IMAGE", "IdClient=" + idClient);
@@ -348,8 +342,9 @@ private static void setIsolation() throws SQLException {
 		commit();
 
 	}
-private static void scenarCommande2() throws SQLException {
-		
+
+	private static void scenarCommande2() throws SQLException {
+
 		scen.AddImage(stmt, idClient, "/Images/Martine.jpg", "0", 10, "Vancances martine");
 		ResultSet res = stmt.executeQuery("select IdImage.currval from dual ");
 		res.next();
@@ -419,7 +414,7 @@ private static void scenarCommande2() throws SQLException {
 		scen.passerCommande(stmt, idClient, idOrder, idAlbum2, "3", "65");
 
 		scen.updatePrice(stmt, idClient, idOrder);
-		
+
 		scen.passerCommande(stmt, idClient, "", idAlbum1, "4", "14");
 		res = stmt.executeQuery("select IdOrder.currval from dual ");
 		res.next();
@@ -428,11 +423,11 @@ private static void scenarCommande2() throws SQLException {
 		scen.passerCommande(stmt, idClient, idOrder2, idAlbum1, "4", "65");
 		scen.passerCommande(stmt, idClient, idOrder2, idAlbum1, "4", "41");
 		scen.passerCommande(stmt, idClient, idOrder2, idAlbum2, "4", "65");
-		
+
 		scen.updatePrice(stmt, idClient, idOrder2);
-		
+
 		req.mettreAJourStatusCommande(stmt);
-		
+
 		commit();
 		req.suiviCommande(stmt, idClient);
 		LectureClavier.lireChaine();
@@ -440,8 +435,9 @@ private static void scenarCommande2() throws SQLException {
 		System.out.println("Vos codes promotionnels : ");
 		req.getContenuTableWithCondition(stmt, "CodePromo", "idClient=" + idClient);
 		LectureClavier.lireChaine();
-		
+
 	}
+
 	public static void scenarFormatPrice() throws SQLException {
 		System.out.println("Avec isolation ? (y or n)");
 		String choix = LectureClavier.lireChaine();
@@ -451,18 +447,18 @@ private static void scenarCommande2() throws SQLException {
 		}
 		ResultSet res = stmt.executeQuery("select price from Formats Where label='A4' ");
 		res.next();
-		
+
 		Double price = Double.parseDouble(res.getString(1));
-		
+
 		res = stmt.executeQuery("select IdOrder from Orders Where IdOrder=2 ");
 		res.next();
 		String IdOrder = res.getString(1);
-		
-		res = stmt.executeQuery("select Quantity from Article Where IdOrder= "+IdOrder);
+
+		res = stmt.executeQuery("select Quantity from Article Where IdOrder= " + IdOrder);
 		res.next();
 		Double quantity = Double.parseDouble(res.getString(1));
-		System.out.println("Le prix du format : "+price + "   Le prix de l'article : "+price*quantity);
-		
+		System.out.println("Le prix du format : " + price + "   Le prix de l'article : " + price * quantity);
+
 	}
 
 	private static void scenarResolution() throws SQLException {

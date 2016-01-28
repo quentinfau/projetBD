@@ -194,8 +194,27 @@ public class Client {
 		}
 	}
 
-	private static void setIsolation() throws SQLException {
-		conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+private static void setIsolation() throws SQLException {
+		
+		int action2;
+		System.out.println("0 -> TRANSACTION_READ_COMMITTED");
+		System.out.println("1 -> TRANSACTION_SERIALIZABLE");
+		action2 = LectureClavier.lireEntier("votre choix de transactions ?");
+		switch (action2) {
+		case 0:
+			conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+			break;
+		case 1:
+			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+			break;
+		default:
+			System.out.println("=> choix incorrect");
+		}
+	}
+	
+	private static void Isolation1(){
+		String cond = "label= 'A5'";
+		req.getContenuTableWithCondition(stmt, "Formats", cond);	
 	}
 
 	private static void scenarCommande() throws SQLException {

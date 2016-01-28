@@ -455,14 +455,15 @@ public class ReqScenario {
 		}
 	}
 
-	public void UpdateFormat(Statement stmt) {
-
+	public boolean UpdateStockFormats(Statement stmt){
 		try {
-			stmt.executeUpdate("Update Formats SET stock=1000 Where IdFormat = 2");
-			System.out.println("Stock modifié");
+			
+			stmt.executeUpdate("UPDATE Formats set stock=stock  - 50 Where Label='A5'");
+			return true;
+			// ********Modife a faire pour image*******//
 		} catch (SQLException e) {
-			System.out.println("Erreur lors de la modification : ");
 			e.printStackTrace();
+			return false;
 		}
 	}
 

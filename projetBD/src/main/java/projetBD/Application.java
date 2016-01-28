@@ -12,6 +12,7 @@ public class Application {
 	static final String USER = "fauq";
 	static final String PASSWD = "bd2015";
 	static final Requete req = new Requete();
+	static final ReqScenario reqSc = new ReqScenario();
 	static Connection conn;
 	static Statement stmt;
 
@@ -53,23 +54,9 @@ public class Application {
 		System.out.println("8 : Commit");
 		System.out.println("9 : Rollback");
 		System.out.println("10 : Drop table");
-		System.out.println("11 : Test");
-		System.out.println("12 : Rollback");
-		System.out.println("13 : Mettre à jour les status de commande et de livraison");
-	}
-
-	private static void test() throws SQLException {
-		stmt.executeQuery("drop table test");
-		// req.executeFile(stmt, "src/main/resources/test.sql");
-
-		// stmt.executeQuery("insert into test values (12, 'Spinnard')");
-		// stmt.executeQuery("insert into test values (13, 'Spinnardo')");
-	}
-
-	private static void Q5() throws SQLException {
-		stmt.executeQuery("insert into LesMaladies values ('Alexis','Sida')");
-		stmt.executeUpdate(
-				"update LesAnimaux set nb_maladies=(select nb_maladies from LesAnimaux where nomA='Alexis')+1 where nomA='Alexis'");
+		System.out.println("11 : Mettre à jour les status de commande et de livraison");
+		System.out.println("12 : Modifier l'isolation");
+		System.out.println("13 : scenaIsolation 1");
 	}
 
 	private static void commit() throws SQLException {
@@ -80,15 +67,37 @@ public class Application {
 		conn.rollback();
 	}
 
-	private static void testDeadLock() throws SQLException {
-		int var = LectureClavier.lireEntier("nouvelle valeur");
-		stmt.executeUpdate("update LesAnimaux set noCage=" + var + " where nomA='Alexis'");
-		var = LectureClavier.lireEntier("nouvelle valeur");
-		stmt.executeUpdate("update LesAnimaux set noCage=" + var + " where nomA='Tintin'");
+private static void setIsolation() throws SQLException {
+		
+		int action2;
+		System.out.println("0 -> TRANSACTION_READ_COMMITTED");
+		System.out.println("1 -> TRANSACTION_SERIALIZABLE");
+		action2 = LectureClavier.lireEntier("votre choix de transactions ?");
+		switch (action2) {
+		case 0:
+			conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+			break;
+		case 1:
+			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+			break;
+		default:
+			System.out.println("=> choix incorrect");
+		}
 	}
-
-	private static void setIsolation() throws SQLException {
-		conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+	
+	private static void Isolation1() throws SQLException{
+		String cond = "label= 'A5'";
+		req.getContenuTableWithCondition(stmt, "Formats", cond);
+		System.out.println("Voulez vs modifier le stock(y/n): ");
+		String rep = LectureClavier.lireChaine();
+		if(rep.equals("y")){
+			
+			reqSc.UpdateStockFormats(stmt);
+			System.out.println("Maj effectuee");
+		}
+		else
+			System.out.println("NTM");
+		
 	}
 
 	private static void closeConnection(Statement stmt) {
@@ -186,10 +195,13 @@ public class Application {
 					}
 					break;
 				case 11:
-					test();
+					req.mettreAJourStatusCommande(stmt);
 					break;
 				case 12:
-					req.mettreAJourStatusCommande(stmt);
+					setIsolation();
+					break;
+				case 13:
+					Isolation1();
 					break;
 				default:
 					System.out.println("=> choix incorrect");

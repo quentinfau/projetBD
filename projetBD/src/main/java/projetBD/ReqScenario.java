@@ -76,10 +76,6 @@ public class ReqScenario {
 
 			switch (choice) {
 			case "Album":
-				System.out.println("Combien de pages ?");
-				nbPage = LectureClavier.lireChaine();
-				System.out.println("Nom de l'album ?");
-				nameAlbum = LectureClavier.lireChaine();
 				sql = "insert into Album values(IdAlbum.NEXTVAL," + IdClient + "," + nbPage + ",'" + nameAlbum + "')";
 				stmt.executeQuery(sql);
 				break;
@@ -245,12 +241,12 @@ public class ReqScenario {
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 		Calendar c = Calendar.getInstance();
 		c.setTime(aujourdhui);
-		c.add(Calendar.DATE, jour); // number of days to add
+		c.add(Calendar.DATE, jour);
 		return sdf.format(c.getTime());
 	}
 
 	public void passerCommande(Statement stmt, String idClient, String idOrder, String idAlbum, String idFormat,
-			String quantity) {
+			String quantity) throws SQLException {
 		ResultSet res;
 		try {
 			if (idOrder.equals("")) {
@@ -268,7 +264,6 @@ public class ReqScenario {
 			if (jour == -1) {
 				System.err.println("ne peut pas etre traité car la vitesse n'est pas assez élevé");
 			} else {
-				System.out.println(getDate(jour));
 				res = stmt.executeQuery(
 						"select idPrestataire from prestataire where preference = (select Max(preference) from Prestataire)");
 				res.next();
@@ -280,37 +275,34 @@ public class ReqScenario {
 				if (limitTime < jour) {
 					stmt.executeUpdate(
 							"insert into Supply (IdSupply, IdPrestataire, DateSup, StatusSup) values (IdSupply.NEXTVAL,'"
-									+ idPrestataire + "', TO_DATE('" + getDate(0) + "+ " + limitTime
-									+ "', 'DD/MM/YYYY') , 'en cours')");
+									+ idPrestataire + "', TO_DATE('" + getDate(0) + "', 'DD/MM/YYYY')+" + limitTime
+									+ " , 'en cours')");
 					res = stmt.executeQuery("select IdSupply.currval from dual");
 					res.next();
 					idSupply = res.getString(1);
 				} else {
-					System.out.println("jour : " + jour + "date : " + getDate(jour));
 					stmt.executeUpdate(
 							"insert into Supply (IdSupply, DateSup, StatusSup) values (IdSupply.NEXTVAL, TO_DATE('"
 									+ getDate(jour) + "', 'DD/MM/YYYY') , 'en cours')");
 					res = stmt.executeQuery("select IdSupply.currval from dual");
 					res.next();
 					idSupply = res.getString(1);
-					System.out.println("avant verif stock");
 					verifierStock(stmt, Integer.parseInt(quantity), idFormat, idAlbum, idSupply, idPrestataire,
-							limitTime);
+							limitTime, jour);
 				}
-				System.out.println("avant insert article");
 				stmt.executeUpdate("insert into Article values (IdArticle.NEXTVAL, " + idOrder + "," + idAlbum + ","
 						+ idSupply + ", " + idFormat + ", " + quantity + ")");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			stmt.getConnection().rollback();
 		}
 	}
 
 	private void verifierStock(Statement stmt, int quantity, String idFormat, String idAlbum, String idSupply,
-			String idPrestataire, int limitTime) {
+			String idPrestataire, int limitTime, int jour) {
 		ResultSet res;
 		try {
-			System.out.println("dans verif stocl");
 			res = stmt.executeQuery("select nbPages from Album where idAlbum=" + idAlbum);
 			res.next();
 			int nbPages = res.getInt("nbPages");
@@ -323,9 +315,11 @@ public class ReqScenario {
 				stmt.executeUpdate("update Supply set DateSup = (TO_DATE('" + getDate(0) + "', 'DD/MM/YY HH24:MI') + "
 						+ limitTime + ") where idSupply=" + idSupply);
 			} else {
-				stmt.executeUpdate(
-						"update Formats set Stock = (Stock - " + total + ") where Formats.IdFormat=" + idFormat);
-				stmt.executeUpdate("update Supply set StatusSup= 'envoye' where idSupply=" + idSupply);
+				if (jour == 0) {
+					stmt.executeUpdate(
+							"update Formats set Stock = (Stock - " + total + ") where Formats.IdFormat=" + idFormat);
+					stmt.executeUpdate("update Supply set StatusSup= 'envoye' where idSupply=" + idSupply);
+				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -335,7 +329,6 @@ public class ReqScenario {
 	public int calculerProductionJournaliere(Statement stmt, int jour, String idFormat, int quantiteArticle,
 			int nbPagesArticle) {
 		try {
-			System.out.println("JOUR : " + jour);
 			ResultSet res, resArticle;
 			Integer productionJour = quantiteArticle * nbPagesArticle, vitesse;
 			Statement stmt2 = stmt.getConnection().createStatement();
@@ -358,12 +351,10 @@ public class ReqScenario {
 								+ idArticle + ")");
 				res.next();
 				int nbPages = res.getInt("nbPages");
-				System.out.println("quantite : " + quantity);
-				System.out.println("nbPage : " + nbPages);
 				productionJour = productionJour + (quantity * nbPages);
 
 			}
-			System.out.println("prod jour : " + productionJour);
+			System.out.println("production du jour " + jour + " : " + productionJour);
 			if (productionJour < vitesse) {
 				return jour;
 			} else {

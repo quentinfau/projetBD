@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -116,6 +117,21 @@ public class Requete {
 		c.setTime(aujourdhui);
 		c.add(Calendar.DATE, jour); // number of days to add
 		return sdf.format(c.getTime());
+	}
+
+	public boolean isToday(String dateString) {
+		Date date = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date dateSup;
+		try {
+			dateSup = sdf.parse(dateString);
+			String dateSupString = sdf.format(dateSup);
+			String dateTodayString = sdf.format(date);
+			return (dateTodayString.equals(dateSupString));
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 
 	public String connexionClient(Statement stmt) {
@@ -451,9 +467,14 @@ public class Requete {
 				while (res.next()) {
 					System.out.print(" dans le format " + res.getString("label"));
 				}
+				System.out.println();
 				res = stmt2.executeQuery("select * from Supply where idSupply=" + resArticle.getString("idSupply"));
 				while (res.next()) {
 					System.out.print(" --> livraison : " + res.getString("statusSup"));
+					System.out.print(" - Date Estimée : " + res.getString("dateSup"));
+					if (null != res.getString("idPrestataire")) {
+						System.out.print(" - Par le prestataire : " + res.getString("idPrestataire"));
+					}
 				}
 				System.out.println();
 			}
@@ -535,7 +556,6 @@ public class Requete {
 					if (jour == -1) {
 						System.err.println("ne peut pas etre traité car la vitesse n'est pas assez élevé");
 					} else {
-						System.out.println(getDate(jour));
 						res = stmt.executeQuery(
 								"select idPrestataire from prestataire where preference = (select Max(preference) from Prestataire)");
 						res.next();
@@ -547,13 +567,12 @@ public class Requete {
 						if (limitTime < jour) {
 							stmt.executeUpdate(
 									"insert into Supply (IdSupply, IdPrestataire, DateSup, StatusSup) values (IdSupply.NEXTVAL,'"
-											+ idPrestataire + "', TO_DATE('" + getDate(0) + "+ " + limitTime
-											+ "', 'DD/MM/YYYY') , 'en cours')");
+											+ idPrestataire + "', TO_DATE('" + getDate(0) + "', 'DD/MM/YYYY')+"
+											+ limitTime + " , 'en cours')");
 							res = stmt.executeQuery("select IdSupply.currval from dual");
 							res.next();
 							idSupply = res.getString(1);
 						} else {
-							System.out.println("jour : " + jour + "date : " + getDate(jour));
 							stmt.executeUpdate(
 									"insert into Supply (IdSupply, DateSup, StatusSup) values (IdSupply.NEXTVAL, TO_DATE('"
 											+ getDate(jour) + "', 'DD/MM/YYYY') , 'en cours')");
@@ -609,10 +628,49 @@ public class Requete {
 		}
 	}
 
+	public void mettreAJourStatusCommande(Statement stmt) {
+		ResultSet resOrder, res;
+		try {
+			Statement stmt2 = stmt.getConnection().createStatement();
+			Statement stmt3 = stmt.getConnection().createStatement();
+			resOrder = stmt.executeQuery("select * from Orders where status!='envoi complet'");
+			while (resOrder.next()) {
+				ArrayList<String> listeStatusSup = new ArrayList<>();
+				String idOrder = resOrder.getString("idOrder");
+				res = stmt2.executeQuery(
+						"select * from Supply where idSupply in (select idSupply from Article where idOrder=" + idOrder
+								+ ")");
+				while (res.next()) {
+
+					String idSupply = res.getString("idSupply");
+					String dateSup = res.getString("dateSup");
+					if (isToday(dateSup)) {
+						stmt3.executeUpdate("update Supply set StatusSup= 'envoye' where idSupply=" + idSupply);
+						listeStatusSup.add("envoye");
+					} else {
+						listeStatusSup.add(res.getString("statusSup"));
+					}
+				}
+				if (listeStatusSup.contains("envoye") && !listeStatusSup.contains("en cours")) {
+					// envoi complet
+					stmt3.executeUpdate("update Orders set status='envoi complet' where idOrder=" + idOrder);
+				} else if (listeStatusSup.contains("en cours") && !listeStatusSup.contains("envoye")) {
+					// en cours
+					stmt3.executeUpdate("update Orders set status='en cours' where idOrder=" + idOrder);
+				} else {
+					// envoie partiel
+					stmt3.executeUpdate("update Orders set status='envoi partiel' where idOrder=" + idOrder);
+				}
+			}
+			System.out.println("Mise à jour effectué");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public int calculerProductionJournaliere(Statement stmt, int jour, String idFormat, int quantiteArticle,
 			int nbPagesArticle) {
 		try {
-			System.out.println("JOUR : " + jour);
 			ResultSet res, resArticle;
 			Integer productionJour = quantiteArticle * nbPagesArticle, vitesse;
 			Statement stmt2 = stmt.getConnection().createStatement();
@@ -635,12 +693,10 @@ public class Requete {
 								+ idArticle + ")");
 				res.next();
 				int nbPages = res.getInt("nbPages");
-				System.out.println("quantite : " + quantity);
-				System.out.println("nbPage : " + nbPages);
 				productionJour = productionJour + (quantity * nbPages);
 
 			}
-			System.out.println("prod jour : " + productionJour);
+			System.out.println("production du jour " + jour + " : " + productionJour);
 			if (productionJour < vitesse) {
 				return jour;
 			} else {

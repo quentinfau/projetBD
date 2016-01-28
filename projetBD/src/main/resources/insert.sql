@@ -1,6 +1,6 @@
 insert into Client (IdClient, FirstName, LastName, Mail, Password, Address) values(IdClient.NEXTVAL,'Alexis','Salem','alexis@salem.fr','secret','grenoble');
 insert into Client (IdClient, FirstName, LastName, Mail, Password, Address) values(IdClient.NEXTVAL,'Quentin','Fau','Quentin@fau.fr','hello','grenoble');
-insert into Client values(IdClient.NEXTVAL,'Mani','To','maniToo@fau.fr','hello','Paris');
+insert into Client values (IdClient.NEXTVAL,'Mani','To','maniToo@fau.fr','hello','Paris');
 insert into Client (IdClient, FirstName, LastName, Mail, Password, Address) values(IdClient.NEXTVAL,'Jean','MI','Jami@fau.fr','hello','Paris');
 
 insert into Formats (IdFormat, Label, Price, ResolutionMin, Speed, Stock) values(IdFormat.NEXTVAL,'A3',2,10,1500,5000);

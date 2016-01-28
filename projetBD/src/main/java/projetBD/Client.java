@@ -267,6 +267,7 @@ public class Client {
 		scen.passerCommande(stmt, idClient, idOrder, idAlbum2, "3", "65");
 
 		scen.updatePrice(stmt, idClient, idOrder);
+		req.mettreAJourStatusCommande(stmt);
 		req.suiviCommande(stmt, idClient);
 		LectureClavier.lireChaine();
 
@@ -275,7 +276,6 @@ public class Client {
 		LectureClavier.lireChaine();
 
 	}
-	
 
 	private static void scenarDeleteImage() throws SQLException {
 
@@ -311,22 +311,21 @@ public class Client {
 		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum1, im1, "1", "Martine foot ", "Foot");
 		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum1, im2, "2", "Martine bad", "bad");
 		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum1, im3, "3", "Martine danse", "La danse");
-		
-		
+
 		System.out.println("Ajout de 3 photos dans l'album Sport. Listes des albums : ");
 		req.getContenuTableWithCondition(stmt, "Album", "idClient=" + idClient);
 		LectureClavier.lireChaine();
-		
+
 		commit();
-	
+
 	}
-	
+
 	private static void scenarResolution() throws SQLException {
-		ResultSet res = stmt.executeQuery("select IdAlbum.currval from dual ");
+		ResultSet res = stmt.executeQuery("select idAlbum from Album where nameAlbum='Martine au sport'");
 		res.next();
 		String idAlbum1 = res.getString(1);
-		req.getContenuTableWithCondition(stmt, "Album", "IdAlbum="+idAlbum1);
-		
+		req.getContenuTableWithCondition(stmt, "Album", "IdAlbum=" + idAlbum1);
+
 		scen.passerCommande(stmt, idClient, "", idAlbum1, "4", "2");
 	}
 
@@ -415,7 +414,10 @@ public class Client {
 					scenarResolution();
 					break;
 				case 31:
-					//scenarFormatPrice();
+					// scenarFormatPrice();
+					break;
+				case 50:
+					req.mettreAJourStatusCommande(stmt);
 					break;
 				case 99:
 					rollback();

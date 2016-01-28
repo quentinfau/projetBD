@@ -55,6 +55,7 @@ public class Application {
 		System.out.println("10 : Drop table");
 		System.out.println("11 : Test");
 		System.out.println("12 : Rollback");
+		System.out.println("13 : Mettre à jour les status de commande et de livraison");
 	}
 
 	private static void test() throws SQLException {
@@ -186,6 +187,9 @@ public class Application {
 					break;
 				case 11:
 					test();
+					break;
+				case 12:
+					req.mettreAJourStatusCommande(stmt);
 					break;
 				default:
 					System.out.println("=> choix incorrect");

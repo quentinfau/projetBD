@@ -64,6 +64,8 @@ public class Client {
 		System.out.println("15 : Scenario Passer Commande");
 		System.out.println("16 : Scenario Delete Image");
 		System.out.println("17 : Scénario Résolution Format");
+		System.out.println("20 : Scénario Supression image partagé");
+		System.out.println("50 : Mettre à jour statut commandes");
 		System.out.println("31 : Transaction Format prix");
 		System.out.println("99 : roolback");
 		System.out.println("100 : Afficher table");
@@ -329,6 +331,25 @@ public class Client {
 		scen.passerCommande(stmt, idClient, "", idAlbum1, "4", "2");
 	}
 
+	private static void scenarSupressionImagePartage() throws SQLException {
+		ResultSet res;
+		String idClient = "2";
+		scen.createAlbum(stmt, "3", "Martine au sport", "Album", "0");
+		res = stmt.executeQuery("select IdAlbum.currval from dual ");
+		res.next();
+		String idAlbum1 = res.getString(1);
+
+		scen.AddImage(stmt, idClient, "/Images/TestPourPartage.jpg", "1", 10, "foot");
+		res = stmt.executeQuery("select IdImage.currval from dual ");
+		res.next();
+		String im1 = res.getString(1);
+
+		scen.ajouterImageDansAlbum(stmt, "3", idAlbum1, im1, "10", "Test Partage ", "Foot");
+
+		scen.supprimerImage(stmt, idClient, im1);
+
+	}
+
 	public static void main(String args[]) {
 
 		try {
@@ -412,6 +433,9 @@ public class Client {
 					break;
 				case 17:
 					scenarResolution();
+					break;
+				case 20:
+					scenarSupressionImagePartage();
 					break;
 				case 31:
 					// scenarFormatPrice();

@@ -61,7 +61,12 @@ public class Client {
 		System.out.println("12 : Drop table");
 		System.out.println("13 : Informations d'un client");
 		System.out.println("14 : Les Albums d'un Client");
-		System.out.println("15 : Scenario 1");
+		System.out.println("15 : Scenario Passer Commande");
+		System.out.println("16 : Scenario Delete Image");
+		System.out.println("17 : Scénario Résolution Format");
+		System.out.println("31 : Transaction Format prix");
+		System.out.println("99 : roolback");
+		System.out.println("100 : Afficher table");
 	}
 
 	private static void menuConnexion() {
@@ -191,7 +196,7 @@ public class Client {
 		conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 	}
 
-	private static void scenar1() throws SQLException {
+	private static void scenarCommande() throws SQLException {
 
 		scen.AddImage(stmt, idClient, "/Images/Martine.jpg", "0", 10, "Vancances martine");
 		ResultSet res = stmt.executeQuery("select IdImage.currval from dual ");
@@ -225,8 +230,6 @@ public class Client {
 
 		System.out.println("Les images ont été ajoutées");
 		req.getContenuTableWithCondition(stmt, "IMAGE", "IdClient=" + idClient);
-		LectureClavier.lireChaine();
-		req.getContenuTableWithCondition(stmt, "Image", "idClient=" + idClient);
 		LectureClavier.lireChaine();
 
 		scen.createAlbum(stmt, idClient, "Martine en vacances", "book", "0");
@@ -270,7 +273,61 @@ public class Client {
 		System.out.println("Vos codes promotionnels : ");
 		req.getContenuTableWithCondition(stmt, "CodePromo", "idClient=" + idClient);
 		LectureClavier.lireChaine();
+
+	}
+	
+
+	private static void scenarDeleteImage() throws SQLException {
+
+		scen.AddImage(stmt, idClient, "/Images/MartineFoot.jpg", "0", 3, "foot");
+		ResultSet res = stmt.executeQuery("select IdImage.currval from dual ");
+		res.next();
+		String im1 = res.getString(1);
+
+		scen.AddImage(stmt, idClient, "/Images/bad.jpg", "0", 4, "bad");
+		res = stmt.executeQuery("select IdImage.currval from dual ");
+		res.next();
+		String im2 = res.getString(1);
+
+		scen.AddImage(stmt, idClient, "/Images/danse.jpg", "1", 18, "danse");
+		res = stmt.executeQuery("select IdImage.currval from dual ");
+		res.next();
+		String im3 = res.getString(1);
+
+		scen.AddImage(stmt, idClient, "/Images/nonUtilise.jpg", "1", 2, "Non utilisée");
+		res = stmt.executeQuery("select IdImage.currval from dual ");
+		res.next();
+		String imNonUtilise = res.getString(1);
+
+		System.out.println("Les images ont été ajoutées");
+		req.getContenuTableWithCondition(stmt, "IMAGE", "IdClient=" + idClient);
+		LectureClavier.lireChaine();
+
+		scen.createAlbum(stmt, idClient, "Martine au sport", "Album", "0");
+		res = stmt.executeQuery("select IdAlbum.currval from dual ");
+		res.next();
+		String idAlbum1 = res.getString(1);
+
+		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum1, im1, "1", "Martine foot ", "Foot");
+		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum1, im2, "2", "Martine bad", "bad");
+		scen.ajouterImageDansAlbum(stmt, idClient, idAlbum1, im3, "3", "Martine danse", "La danse");
+		
+		
+		System.out.println("Ajout de 3 photos dans l'album Sport. Listes des albums : ");
+		req.getContenuTableWithCondition(stmt, "Album", "idClient=" + idClient);
+		LectureClavier.lireChaine();
+		
 		commit();
+	
+	}
+	
+	private static void scenarResolution() throws SQLException {
+		ResultSet res = stmt.executeQuery("select IdAlbum.currval from dual ");
+		res.next();
+		String idAlbum1 = res.getString(1);
+		req.getContenuTableWithCondition(stmt, "Album", "IdAlbum="+idAlbum1);
+		
+		scen.passerCommande(stmt, idClient, "", idAlbum1, "4", "2");
 	}
 
 	public static void main(String args[]) {
@@ -349,10 +406,25 @@ public class Client {
 					albumClient();
 					break;
 				case 15:
-					scenar1();
+					scenarCommande();
 					break;
 				case 16:
+					scenarDeleteImage();
+					break;
+				case 17:
+					scenarResolution();
+					break;
+				case 31:
+					//scenarFormatPrice();
+					break;
+				case 99:
 					rollback();
+					break;
+				case 100:
+					System.out.println("Quel table voulez vous afficher ?");
+					req.listerTables(stmt);
+					String nomTable = LectureClavier.lireChaine();
+					req.getContenuTable(stmt, nomTable);
 					break;
 				default:
 					System.out.println("=> choix incorrect");

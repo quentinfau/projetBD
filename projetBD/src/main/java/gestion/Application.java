@@ -1,10 +1,14 @@
-package projetBD;
+package gestion;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import client.ReqScenario;
+import client.Requete;
+import utils.LectureClavier;
 
 public class Application {
 

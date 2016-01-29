@@ -1,5 +1,5 @@
 Create or Replace TRIGGER trg_codepromo
-After insert or Update on Orders
+After insert or Update of totalPrice on Orders 
 For each row
 declare
 	n int;

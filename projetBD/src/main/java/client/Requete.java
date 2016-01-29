@@ -1,4 +1,4 @@
-package projetBD;
+package client;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,6 +13,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+
+import utils.LectureClavier;
 
 public class Requete {
 	static final String RESOURCES = "src/main/resources/";

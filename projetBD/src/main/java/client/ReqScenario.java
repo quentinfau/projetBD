@@ -1,4 +1,4 @@
-package projetBD;
+package client;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -7,6 +7,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+
+import utils.LectureClavier;
 
 public class ReqScenario {
 	static final String RESOURCES = "src/main/resources/";
